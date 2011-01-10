@@ -87,8 +87,6 @@ class Menu:
             self.screen.blit(img, \
                 self.xy_from_center(img, self.scroll_x_func(i), self.scroll_y_func(i)))
 
-        print "position for item 0: (", self.scroll_x_func(i), ", ", self.scroll_y_func(i), ")"
-
         if self.anim == 0 and len(self.menu) > 0:
             self.draw_text()
 	
@@ -132,7 +130,6 @@ class Menu:
         
         self.anim = 1
         self.animDirection = direction
-        print "starting anim with direction ", direction, ", current is ", self.current
 
     def work(self):
         self.clock.tick(self.FPS)
@@ -147,8 +144,6 @@ class Menu:
         self.draw()
         pygame.display.flip()
 
-        print "self.anim = ", self.anim
-        
         return 1
 
     def process_click(self, pos):
