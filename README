@@ -1,0 +1,6 @@
+TouchBMC is a XBMC remote controller for use with small touchscreens.
+Something like YATSE, but with much less features and much bigger buttons.
+
+Currently only a sketch of the GUI is written.
+
+Depends only on pygame, but this might change.
