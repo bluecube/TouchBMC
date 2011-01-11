@@ -35,7 +35,7 @@ class Menu:
         self.ANTIALIAS = config["antialias"]
 
 
-        self.disabledY = int(self.DISABLED_LINE * self.screen.get_height())
+        self.disabled_y = int(self.DISABLED_LINE * self.screen.get_height())
 
     def set_menu(self, menu):
         """
@@ -53,7 +53,7 @@ class Menu:
         The parameter text should be an iterable with lines to display
         """
         
-        self.bgText = map(lambda str: self.bg_font.render(str, self.ANTIALIAS, self.BG_FONT_COLOR), text)
+        self.bg_text = map(lambda str: self.bg_font.render(str, self.ANTIALIAS, self.BG_FONT_COLOR), text)
 
         self.dirty = True
 
@@ -93,7 +93,7 @@ class Menu:
         """
         self.screen.blit(self.background, (0, 0))
 
-        if len(self.bgText):
+        if len(self.bg_text):
             self.draw_bg_text()
 
         for i in xrange(0, len(self.menu)):
@@ -132,14 +132,14 @@ class Menu:
 
                 poly = t*t * (-5 + t * (14 + t * -8))
 
-                y = int(poly * self.screen.get_height() / 2 + (1 - poly) * self.disabledY)
+                y = int(poly * self.screen.get_height() / 2 + (1 - poly) * self.disabled_y)
             else:
-                y = self.disabledY
+                y = self.disabled_y
         else:
             if i == self.current:
                 y = self.screen.get_height() / 2
             else:
-                y = self.disabledY
+                y = self.disabled_y
 
         
         item = self.menu[i]
@@ -168,7 +168,7 @@ class Menu:
         Actually draw the background text.
         """
         (offset, y) = self.BG_FONT_POS
-        for line in self.bgText:
+        for line in self.bg_text:
             x = self.screen.get_width() - offset - line.get_width();
             self.screen.blit(line, (x, y))
             y += self.bg_font.get_linesize()
@@ -244,4 +244,4 @@ class Menu:
     anim_direction = LEFT
 
     back_action = 0
-    bgText = ()
+    bg_text = ()
