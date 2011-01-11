@@ -28,7 +28,7 @@ class Menu:
         self.font = pygame.font.SysFont(config["font"], config["font size"])
         self.FONT_COLOR = config["font color"]
 
-        self.bgFont = pygame.font.SysFont(config["bg font"], config["bg font size"])
+        self.bg_font = pygame.font.SysFont(config["bg font"], config["bg font size"])
         self.BG_FONT_COLOR = config["bg font color"]
         self.BG_FONT_POS = config["bg font pos"]
 
@@ -38,67 +38,67 @@ class Menu:
         self.disabledY = int(self.DISABLED_LINE * self.screen.get_height())
 
     def set_menu(self, menu):
+        """
+        Set the current menu (array of MenuItem)
+        """
         self.anim = 0
         self.menu = menu
         self.current = 0
 
         self.dirty = True
 
+    def set_bg_text(self, text):
+        """
+        Set the text to be displayed on the background.
+        The parameter text should be an iterable with lines to display
+        """
+        
+        self.bgText = map(lambda str: self.bg_font.render(str, self.ANTIALIAS, self.BG_FONT_COLOR), text)
+
+        self.dirty = True
+
+    def set_back_link(self, action):
+        """
+        Set the action for the back link.
+        If action is false then no backwards link will be displayed.
+        """
+        back_action = action
+
     def update(self):
+        """
+        Step the animation, if applicable.
+        """
+        if self.anim == 0:
+            return
+
         if self.anim >= self.SCROLL_TIME:
-            self.current += self.animDirection
+            self.current += self.anim_direction
             self.anim = 0;
         else:
             self.anim += 1
 
         self.dirty = True
 
-    def scroll_x_func(self, i):
-        "Returns the X coordinate of a center of the menu item with index i"
-        #screen center
-        pos = self.screen.get_width() / 2
-
-        # position of item #i if it was not moving
-        pos += (i - self.current) * self.DISTANCE 
-
-        # position of the anim (quadratic function of time)
-        t = self.anim / float(self.SCROLL_TIME)
-        pos -= int(self.animDirection * self.DISTANCE * (2 * t - t ** 2))
-
-        return pos
-
-    def scroll_y_func(self, i):
-        if i == self.current or i == self.current + self.animDirection:
-            t = self.anim / float(self.SCROLL_TIME)
-
-            if i == self.current:
-                t = 1 - t
-
-            poly = t*t * (-5 + t * (14 + t * -8))
-
-            return int(poly * self.screen.get_height() / 2 + (1 - poly) * self.disabledY)
-        else:
-            return self.disabledY
-
     def xy_from_center(self, img, centerx, centery):
+        """
+        Calculate coordinates of the top left corner from the center coords.
+        """
         x = centerx - img.get_width() / 2
         y = centery - img.get_height() / 2
         return (x, y)
 
     def draw(self):
+        """
+        Redraw the whole screen, clear the dirty flag.
+        """
         self.screen.blit(self.background, (0, 0))
 
         if len(self.bgText):
             self.draw_bg_text()
 
         for i in xrange(0, len(self.menu)):
-            img = self.menu[i].image
-            self.screen.blit(img, \
-                self.xy_from_center(img, self.scroll_x_func(i), self.scroll_y_func(i)))
+            self.draw_item(i)
 
-        if self.anim == 0 and len(self.menu) > 0:
-            self.draw_text()
-	
         if self.can_go(self.LEFT):
             self.screen.blit(self.left, \
                 self.xy_from_center(self.left, self.DISTANCE / 2, self.screen.get_height() / 2))
@@ -106,22 +106,60 @@ class Menu:
             self.screen.blit(self.right, \
                 self.xy_from_center(self.right, self.screen.get_width() - self.DISTANCE / 2, self.screen.get_height() / 2))
 
-        if self.backAction:
+        if self.back_action:
             self.screen.blit(self.back, \
                 self.xy_from_center(self.back, self.DISTANCE / 2, self.DISTANCE / 2))
 
-    def draw_text(self):
-        "Draw the text on the current item"
-        currentItem = self.menu[self.current]
+    def draw_item(self, i):
+        """
+        Draw a single menu item to its correct position.
+        """
+        x = self.screen.get_width() / 2
+
+        # position of item #i if it was not moving
+        x += (i - self.current) * self.DISTANCE 
+
+        if self.anim:    
+            # animation time (from 0 to 1)
+            t = self.anim / float(self.SCROLL_TIME)
+
+            # position of the anim (quadratic function of time)
+            x -= int(self.anim_direction * self.DISTANCE * (2 * t - t ** 2))
+
+            if i == self.current or i == self.current + self.anim_direction:
+                if i == self.current:
+                    t = 1 - t
+
+                poly = t*t * (-5 + t * (14 + t * -8))
+
+                y = int(poly * self.screen.get_height() / 2 + (1 - poly) * self.disabledY)
+            else:
+                y = self.disabledY
+        else:
+            if i == self.current:
+                y = self.screen.get_height() / 2
+            else:
+                y = self.disabledY
+
+        
+        item = self.menu[i]
+        img = item.image
+
+        self.screen.blit(img, self.xy_from_center(img, x, y))
+
+	if self.anim or i != self.current:
+		return
+	
+	#draw the text
 
         try:
-            text = currentItem.renderedText
+            text = item.rendered_text
         except AttributeError:
-            text = self.font.render(currentItem.text, self.ANTIALIAS, self.FONT_COLOR)
-            currentItem.renderedText = text
+            text = self.font.render(item.text, self.ANTIALIAS, self.FONT_COLOR)
+            item.rendered_text = text
 
-        x = self.scroll_x_func(self.current) + currentItem.image.get_width() / 2 - text.get_width();
-        y = self.scroll_y_func(self.current) - currentItem.image.get_height() / 2 - self.font.get_ascent();
+        x += img.get_width() / 2 - text.get_width();
+        y -= img.get_height() / 2 + self.font.get_ascent();
 
         self.screen.blit(text, (x, y))
 
@@ -133,28 +171,36 @@ class Menu:
         for line in self.bgText:
             x = self.screen.get_width() - offset - line.get_width();
             self.screen.blit(line, (x, y))
-            y += self.bgFont.get_linesize()
+            y += self.bg_font.get_linesize()
 
     def can_go(self, direction):
-        "Returns true if we can move in the given direction with the menu"
+    	"""
+	Find out if the menu selection can move in the given direction.
+	"""
         current = self.current
         if self.anim:
-            current += self.animDirection
+            current += self.anim_direction
 
         return (direction == self.LEFT and current >= 1) or \
             (direction == self.RIGHT and current < len(self.menu) - 1)
 
     def start_anim(self, direction):
+    	"""
+	Start animation in the given direction, restart an animation if it was already running.
+	"""
         if not self.can_go(direction):
             return
 
         if self.anim:
-            self.current += self.animDirection
+            self.current += self.anim_direction
         
         self.anim = 1
-        self.animDirection = direction
+        self.anim_direction = direction
 
     def work(self):
+    	"""
+	Process a single frame
+	"""
         self.clock.tick(self.FPS)
 
         for event in pygame.event.get():
@@ -173,12 +219,17 @@ class Menu:
         return 1
 
     def process_click(self, pos):
+    	"""
+	Do the correct thing when a click is detected
+	"""
+
+	# we only have nine sensitive areas
         (x, y) = pos
         x = x // (self.screen.get_width() / 3)
         y = y // (self.screen.get_height() / 3)
 
-        if x == 0 and y == 0 and self.backAction:
-            backAction()
+        if x == 0 and y == 0 and self.back_action:
+            back_action()
         elif y == 1:
             if x == 0:
                 self.start_anim(self.LEFT)
@@ -187,20 +238,10 @@ class Menu:
             if x == 2:
                 self.start_anim(self.RIGHT)
 
-    def set_bg_text(self, text):
-        """
-        Set the text to be displayed on the background.
-        The parameter text should be an iterable with lines to display
-        """
-        
-        self.bgText = map(lambda str: self.bgFont.render(str, self.ANTIALIAS, self.BG_FONT_COLOR), text)
-
-        self.dirty = True
-
     dirty = False
 
     anim = 0
-    animDirection = LEFT
+    anim_direction = LEFT
 
-    backAction = 0
+    back_action = 0
     bgText = ()
