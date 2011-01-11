@@ -7,9 +7,16 @@ config["back"] = "left.png"
 
 config["caption"] = "TouchBMC"
 
+config["antialias"] = True
+
 config["width"] = 800
 config["height"] = 600
 
-config["font"] = "Arial bold"
+config["font"] = "Bitstream Vera Sans"
 config["font size"] = 64
 config["font color"] = (100, 100, 100)
+
+config["bg font"] = "Bitstream Vera Sans"
+config["bg font size"] = 64
+config["bg font color"] = (180, 180, 180)
+config["bg font pos"] = (10, 10)

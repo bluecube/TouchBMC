@@ -20,6 +20,8 @@ menu.set_menu([ \
     MenuItem("stop.png", "Stop", 0), \
 ])
 
+menu.set_bg_text(("Background text", "... with two lines"))
+
 while menu.work():
     pass
 

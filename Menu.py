@@ -28,6 +28,13 @@ class Menu:
         self.font = pygame.font.SysFont(config["font"], config["font size"])
         self.FONT_COLOR = config["font color"]
 
+        self.bgFont = pygame.font.SysFont(config["bg font"], config["bg font size"])
+        self.BG_FONT_COLOR = config["bg font color"]
+        self.BG_FONT_POS = config["bg font pos"]
+
+        self.ANTIALIAS = config["antialias"]
+
+
         self.disabledY = int(self.DISABLED_LINE * self.screen.get_height())
 
     def set_menu(self, menu):
@@ -35,17 +42,16 @@ class Menu:
         self.menu = menu
         self.current = 0
 
-        self.update()
-        self.draw()
+        self.dirty = True
 
     def update(self):
-        if self.anim == 0:
-            return
         if self.anim >= self.SCROLL_TIME:
             self.current += self.animDirection
             self.anim = 0;
         else:
             self.anim += 1
+
+        self.dirty = True
 
     def scroll_x_func(self, i):
         "Returns the X coordinate of a center of the menu item with index i"
@@ -80,7 +86,10 @@ class Menu:
         return (x, y)
 
     def draw(self):
-        self.screen.blit(self.background, (0, 0));
+        self.screen.blit(self.background, (0, 0))
+
+        if len(self.bgText):
+            self.draw_bg_text()
 
         for i in xrange(0, len(self.menu)):
             img = self.menu[i].image
@@ -105,12 +114,26 @@ class Menu:
         "Draw the text on the current item"
         currentItem = self.menu[self.current]
 
-        text = self.font.render(currentItem.text, True, self.FONT_COLOR)
+        try:
+            text = currentItem.renderedText
+        except AttributeError:
+            text = self.font.render(currentItem.text, self.ANTIALIAS, self.FONT_COLOR)
+            currentItem.renderedText = text
 
         x = self.scroll_x_func(self.current) + currentItem.image.get_width() / 2 - text.get_width();
         y = self.scroll_y_func(self.current) - currentItem.image.get_height() / 2 - self.font.get_ascent();
 
         self.screen.blit(text, (x, y))
+
+    def draw_bg_text(self):
+        """
+        Actually draw the background text.
+        """
+        (offset, y) = self.BG_FONT_POS
+        for line in self.bgText:
+            x = self.screen.get_width() - offset - line.get_width();
+            self.screen.blit(line, (x, y))
+            y += self.bgFont.get_linesize()
 
     def can_go(self, direction):
         "Returns true if we can move in the given direction with the menu"
@@ -140,9 +163,12 @@ class Menu:
             elif event.type == MOUSEBUTTONDOWN:
                 self.process_click(event.pos)
 
-        self.update()
-        self.draw()
-        pygame.display.flip()
+        if self.anim:
+            self.update()
+
+        if self.dirty:
+            self.draw()
+            pygame.display.flip()
 
         return 1
 
@@ -160,10 +186,21 @@ class Menu:
                 self.menu[self.current].action()
             if x == 2:
                 self.start_anim(self.RIGHT)
-        
 
+    def set_bg_text(self, text):
+        """
+        Set the text to be displayed on the background.
+        The parameter text should be an iterable with lines to display
+        """
+        
+        self.bgText = map(lambda str: self.bgFont.render(str, self.ANTIALIAS, self.BG_FONT_COLOR), text)
+
+        self.dirty = True
+
+    dirty = False
 
     anim = 0
     animDirection = LEFT
 
     backAction = 0
+    bgText = ()
