@@ -3,25 +3,26 @@
 import pygame
 
 from config import config
-from Menu import Menu
-from MenuItem import MenuItem
+from gui import Gui
+from menu import MenuItem, Menu
 
-pygame.init()
 
-menu = Menu(config)
+gui = Gui(config)
 
-menu.set_menu([ \
-    MenuItem("circle.png", "This is a circle", 0), \
-    MenuItem("1.png", "one", 0), \
-    MenuItem("2.png", "two", 0), \
-    MenuItem("3.png", "three", 0), \
-    MenuItem("play.png", "Play", 0), \
-    MenuItem("pause.png", "Pause", 0), \
-    MenuItem("stop.png", "Stop", 0), \
-])
+root_menu = Menu(None, 
+    ("circle.png", "This is a circle", 0),
+    ("1.png", "one", 0),
+    ("2.png", "two", 0),
+    ("3.png", "three", 0),
+    ("play.png", "Play", 0),
+    ("pause.png", "Pause", 0),
+    ("stop.png", "Stop", 0),
+)
 
-menu.set_bg_text(("Background text", "... with two lines"))
+gui.set_menu(root_menu)
 
-while menu.work():
+gui.set_bg_text(("Background text", "... with two lines"))
+
+while gui.work():
     pass
 

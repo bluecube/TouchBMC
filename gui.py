@@ -3,7 +3,7 @@ import math
 import pygame
 from pygame.locals import *
 
-class Menu:
+class Gui:
     FPS = 30
     SCROLL_TIME = 0.5 * FPS
     DISTANCE = 200
@@ -14,6 +14,10 @@ class Menu:
     RIGHT = 1
 
     def __init__(self, config):
+        # only initialize what we really need
+        pygame.display.init()
+        pygame.font.init()
+
         pygame.display.set_mode((config["width"], config["height"]))#, pygame.FULLSCREEN)
         pygame.display.set_caption(config["caption"])
         self.screen = pygame.display.get_surface()
@@ -34,18 +38,28 @@ class Menu:
 
         self.ANTIALIAS = config["antialias"]
 
-
         self.disabled_y = int(self.DISABLED_LINE * self.screen.get_height())
 
     def set_menu(self, menu):
         """
-        Set the current menu (array of MenuItem)
+        Set the current items.
         """
         self.anim = 0
-        self.menu = menu
+        self.items = menu.items
         self.current = 0
 
+        if menu.parent:
+            self.back_action = self.action_helper(menu.parent)
+        else:
+            self.back_action = None
+
         self.dirty = True
+
+    def action_helper(self, menu):
+        """
+        Creates an action (a function) that changes to a given menu
+        """
+        return lambda: self.set_menu(menu)
 
     def set_bg_text(self, text):
         """
@@ -56,13 +70,6 @@ class Menu:
         self.bg_text = map(lambda str: self.bg_font.render(str, self.ANTIALIAS, self.BG_FONT_COLOR), text)
 
         self.dirty = True
-
-    def set_back_link(self, action):
-        """
-        Set the action for the back link.
-        If action is false then no backwards link will be displayed.
-        """
-        back_action = action
 
     def update(self):
         """
@@ -96,7 +103,7 @@ class Menu:
         if len(self.bg_text):
             self.draw_bg_text()
 
-        for i in xrange(0, len(self.menu)):
+        for i in xrange(0, len(self.items)):
             self.draw_item(i)
 
         if self.can_go(self.LEFT):
@@ -112,7 +119,7 @@ class Menu:
 
     def draw_item(self, i):
         """
-        Draw a single menu item to its correct position.
+        Draw a single items item to its correct position.
         """
         x = self.screen.get_width() / 2
 
@@ -142,7 +149,7 @@ class Menu:
                 y = self.disabled_y
 
         
-        item = self.menu[i]
+        item = self.items[i]
         img = item.image
 
         self.screen.blit(img, self.xy_from_center(img, x, y))
@@ -175,14 +182,14 @@ class Menu:
 
     def can_go(self, direction):
     	"""
-	Find out if the menu selection can move in the given direction.
+	Find out if the items selection can move in the given direction.
 	"""
         current = self.current
         if self.anim:
             current += self.anim_direction
 
         return (direction == self.LEFT and current >= 1) or \
-            (direction == self.RIGHT and current < len(self.menu) - 1)
+            (direction == self.RIGHT and current < len(self.items) - 1)
 
     def start_anim(self, direction):
     	"""
@@ -234,7 +241,7 @@ class Menu:
             if x == 0:
                 self.start_anim(self.LEFT)
             if x == 1:
-                self.menu[self.current].action()
+                self.items[self.current].action()
             if x == 2:
                 self.start_anim(self.RIGHT)
 
