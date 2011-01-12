@@ -40,27 +40,35 @@ class Gui:
 
         self.disabled_y = int(self.DISABLED_LINE * self.screen.get_height())
 
-    def set_menu(self, menu):
+        self.current = 0
+
+    def set_menu(self, menu, current = 0):
         """
         Set the current items.
         """
+
+        try:
+            self.items.last_index = self.current
+        except AttributeError:
+            pass
+
         self.anim = 0
         self.items = menu
-        self.current = 0
+        self.current = current
 
         if menu.parent:
-            self.back_action = self.action_helper(menu.parent)
+            self.back_action = self.action_helper(menu.parent, menu.parent.last_index)
         else:
             self.back_action = None
 
         self.dirty = True
 
-    def action_helper(self, menu):
+    def action_helper(self, menu, current = 0):
         """
         Creates an action (a function) that changes to a given menu
         """
         def action(gui):
-            gui.set_menu(menu)
+            gui.set_menu(menu, current)
 
         return action
 

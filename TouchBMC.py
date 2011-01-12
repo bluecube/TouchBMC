@@ -24,6 +24,13 @@ circle_menu.fill(root_menu,
     ("3.png", "completely", 0),
     ("2.png", "different", 0),
     ("1.png", "menu", 0),
+    ("3.png", "abraka", 0),
+    ("2.png", "dabra", 0),
+    ("1.png", "once", 0),
+    ("3.png", "upon", 0),
+    ("2.png", "a", 0),
+    ("1.png", "midnight", 0),
+    ("3.png", "dready", 0),
 )
 
 gui.set_menu(root_menu)

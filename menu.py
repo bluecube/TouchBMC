@@ -14,6 +14,8 @@ class Menu:
         """
         self.fill(parent, *args)
 
+        self.last_index = 0
+
     def fill(self, parent, *args):
         """
         Parameters are reference to a parrent menu, followed
@@ -41,6 +43,8 @@ class HierarchicalMenu(Menu):
         self.ANTIALIAS = config["antialias"]
 
         self.fill(parent, *args)
+
+        self.last_index = 0
 
     def fill(self, parent, *args):
         """
