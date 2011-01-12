@@ -162,6 +162,9 @@ class Gui:
         
         #draw the text
 
+        if len(item.text) == 0:
+            return;
+
         try:
             text = item.rendered_text
         except AttributeError:

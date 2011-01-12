@@ -69,7 +69,7 @@ class HierarchicalMenu(Menu):
                     gui.set_menu(self._get_submenu(key))
                 return action
 
-            self.items.append(MenuItem(image, key, helper(key)))
+            self.items.append(MenuItem(image, "", helper(key)))
 
     def _get_letter(self, str):
         """
