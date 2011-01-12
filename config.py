@@ -13,7 +13,7 @@ config["width"] = 800
 config["height"] = 600
 
 config["font"] = "Bitstream Vera Sans"
-config["font size"] = 64
+config["font size"] = 48
 config["font color"] = (100, 100, 100)
 
 config["bg font"] = "Bitstream Vera Sans"

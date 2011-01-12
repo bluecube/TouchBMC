@@ -31,12 +31,13 @@ circle_menu.fill(root_menu,
     ("2.png", "a", 0),
     ("1.png", "midnight", 0),
     ("3.png", "dready", 0),
+    ("3.png", "3, can't you see?", 0),
 )
 
 gui.set_menu(root_menu)
 
 gui.set_bg_text(("Background text", "... with two lines"))
 
-while gui.work():
-    pass
+while True:
+    gui.work();
 

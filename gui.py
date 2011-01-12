@@ -1,4 +1,5 @@
 import os
+import sys
 import math
 import pygame
 from pygame.locals import *
@@ -108,6 +109,7 @@ class Gui:
         """
         Redraw the whole screen, clear the dirty flag.
         """
+        
         self.screen.blit(self.background, (0, 0))
 
         if len(self.bg_text):
@@ -126,6 +128,8 @@ class Gui:
         if self.back_action:
             self.screen.blit(self.back, \
                 self.xy_from_center(self.back, self.DISTANCE / 2, self.DISTANCE / 2))
+
+        self.dirty = False
 
     def draw_item(self, i):
         """
@@ -228,24 +232,28 @@ class Gui:
 
     def work(self):
         """
-        Process a single frame
+        Process a single frame. Note that this might block.
         """
         self.clock.tick(self.FPS)
-
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                return 0
-            elif event.type == MOUSEBUTTONDOWN:
-                self.process_click(event.pos)
-
-        if self.anim:
-            self.update()
 
         if self.dirty:
             self.draw()
             pygame.display.flip()
 
-        return 1
+        for event in pygame.event.get():
+            self.process_event(event)
+
+        if self.anim:
+            self.update()
+        else:
+            event = pygame.event.wait();
+            self.process_event(event);
+
+    def process_event(self, event):
+        if event.type == QUIT:
+            sys.exit()
+        elif event.type == MOUSEBUTTONUP:
+            self.process_click(event.pos)
 
     def process_click(self, pos):
         """
