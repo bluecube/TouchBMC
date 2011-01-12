@@ -4,11 +4,11 @@ import pygame
 
 from config import config
 from gui import Gui
-from menu import MenuItem, Menu
+from menu import MenuItem, Menu, HierarchicalMenu
 
 gui = Gui(config)
 
-circle_menu = Menu()
+circle_menu = HierarchicalMenu(config)
 
 root_menu = Menu(None, 
     ("circle.png", "This is a circle", gui.action_helper(circle_menu)),
