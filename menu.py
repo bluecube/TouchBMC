@@ -17,6 +17,12 @@ class Menu:
         self.parent = parent
         self.items = map(lambda x: MenuItem(*x), args)
 
+    def __len__(self):
+        return len(self.items)
+
+    def __getitem__(self, key):
+        return self.items[key]
+
 class MenuItem:
     def __init__(self, image, text, action):
         "Construct the menu item, load its image."

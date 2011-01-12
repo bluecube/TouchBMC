@@ -45,7 +45,7 @@ class Gui:
         Set the current items.
         """
         self.anim = 0
-        self.items = menu.items
+        self.items = menu
         self.current = 0
 
         if menu.parent:
