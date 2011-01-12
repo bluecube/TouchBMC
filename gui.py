@@ -48,7 +48,7 @@ class Gui:
         self.items = menu
         self.current = 0
 
-        if menu.parent:
+        if callable(menu.parent):
             self.back_action = self.action_helper(menu.parent)
         else:
             self.back_action = None
@@ -235,13 +235,16 @@ class Gui:
         x = x // (self.screen.get_width() / 3)
         y = y // (self.screen.get_height() / 3)
 
-        if x == 0 and y == 0 and self.back_action:
+        if x == 0 and y == 0 and callable(self.back_action):
             self.back_action()
         elif y == 1:
             if x == 0:
                 self.start_anim(self.LEFT)
             if x == 1:
-                self.items[self.current].action()
+                if callable(self.items[self.current].action):
+                    self.items[self.current].action()
+                else:
+                    print "Invalid action on item!"
             if x == 2:
                 self.start_anim(self.RIGHT)
 
