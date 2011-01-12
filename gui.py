@@ -90,8 +90,7 @@ class Gui:
             return
 
         if self.anim >= self.SCROLL_TIME:
-            self.current += self.anim_direction
-            self.anim = 0;
+            self.stop_anim()
         else:
             self.anim += 1
 
@@ -212,11 +211,20 @@ class Gui:
         if not self.can_go(direction):
             return
 
-        if self.anim:
-            self.current += self.anim_direction
+        self.stop_anim()
         
         self.anim = 1
         self.anim_direction = direction
+
+    def stop_anim(self):
+        """
+        Immediately stop the animation (skip the rest of it).
+        """
+        if not self.anim:
+            return
+
+        self.current += self.anim_direction
+        self.anim = 0
 
     def work(self):
         """
@@ -254,6 +262,8 @@ class Gui:
             if x == 0:
                 self.start_anim(self.LEFT)
             if x == 1:
+                self.stop_anim()
+
                 item = self.items[self.current]
                 if callable(item.action):
                     item.action(self)
