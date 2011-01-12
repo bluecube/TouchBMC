@@ -6,17 +6,24 @@ from config import config
 from gui import Gui
 from menu import MenuItem, Menu
 
-
 gui = Gui(config)
 
+circle_menu = Menu()
+
 root_menu = Menu(None, 
-    ("circle.png", "This is a circle", 0),
+    ("circle.png", "This is a circle", gui.action_helper(circle_menu)),
     ("1.png", "one", 0),
     ("2.png", "two", 0),
     ("3.png", "three", 0),
     ("play.png", "Play", 0),
     ("pause.png", "Pause", 0),
     ("stop.png", "Stop", 0),
+)
+
+circle_menu.fill(root_menu,
+    ("3.png", "completely", 0),
+    ("2.png", "different", 0),
+    ("1.png", "menu", 0),
 )
 
 gui.set_menu(root_menu)

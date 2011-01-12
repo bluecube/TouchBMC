@@ -236,7 +236,7 @@ class Gui:
         y = y // (self.screen.get_height() / 3)
 
         if x == 0 and y == 0 and self.back_action:
-            back_action()
+            self.back_action()
         elif y == 1:
             if x == 0:
                 self.start_anim(self.LEFT)
