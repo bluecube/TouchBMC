@@ -22,10 +22,10 @@ class Gui:
         pygame.display.set_caption(config["caption"])
         self.screen = pygame.display.get_surface()
 
-       	self.background = pygame.image.load(config["background"]).convert()
-       	self.left = pygame.image.load(config["left"]).convert_alpha()
-       	self.right = pygame.image.load(config["right"]).convert_alpha()
-       	self.back = pygame.image.load(config["back"]).convert_alpha()
+        self.background = pygame.image.load(config["background"]).convert()
+        self.left = pygame.image.load(config["left"]).convert_alpha()
+        self.right = pygame.image.load(config["right"]).convert_alpha()
+        self.back = pygame.image.load(config["back"]).convert_alpha()
 
         self.clock = pygame.time.Clock()
 
@@ -48,7 +48,7 @@ class Gui:
         self.items = menu
         self.current = 0
 
-        if callable(menu.parent):
+        if menu.parent:
             self.back_action = self.action_helper(menu.parent)
         else:
             self.back_action = None
@@ -59,7 +59,10 @@ class Gui:
         """
         Creates an action (a function) that changes to a given menu
         """
-        return lambda: self.set_menu(menu)
+        def action(gui):
+            gui.set_menu(menu)
+
+        return action
 
     def set_bg_text(self, text):
         """
@@ -126,7 +129,7 @@ class Gui:
         # position of item #i if it was not moving
         x += (i - self.current) * self.DISTANCE 
 
-        if self.anim:    
+        if self.anim:
             # animation time (from 0 to 1)
             t = self.anim / float(self.SCROLL_TIME)
 
@@ -154,10 +157,10 @@ class Gui:
 
         self.screen.blit(img, self.xy_from_center(img, x, y))
 
-	if self.anim or i != self.current:
-		return
-	
-	#draw the text
+        if self.anim or i != self.current:
+            return
+        
+        #draw the text
 
         try:
             text = item.rendered_text
@@ -181,9 +184,9 @@ class Gui:
             y += self.bg_font.get_linesize()
 
     def can_go(self, direction):
-    	"""
-	Find out if the items selection can move in the given direction.
-	"""
+        """
+        Find out if the items selection can move in the given direction.
+        """
         current = self.current
         if self.anim:
             current += self.anim_direction
@@ -192,9 +195,9 @@ class Gui:
             (direction == self.RIGHT and current < len(self.items) - 1)
 
     def start_anim(self, direction):
-    	"""
-	Start animation in the given direction, restart an animation if it was already running.
-	"""
+        """
+        Start animation in the given direction, restart an animation if it was already running.
+        """
         if not self.can_go(direction):
             return
 
@@ -205,9 +208,9 @@ class Gui:
         self.anim_direction = direction
 
     def work(self):
-    	"""
-	Process a single frame
-	"""
+        """
+        Process a single frame
+        """
         self.clock.tick(self.FPS)
 
         for event in pygame.event.get():
@@ -226,23 +229,23 @@ class Gui:
         return 1
 
     def process_click(self, pos):
-    	"""
-	Do the correct thing when a click is detected
-	"""
-
-	# we only have nine sensitive areas
+        """
+        Do the correct thing when a click is detected
+        """
+        # we only have nine sensitive areas
         (x, y) = pos
         x = x // (self.screen.get_width() / 3)
         y = y // (self.screen.get_height() / 3)
 
         if x == 0 and y == 0 and callable(self.back_action):
-            self.back_action()
+            self.back_action(self)
         elif y == 1:
             if x == 0:
                 self.start_anim(self.LEFT)
             if x == 1:
-                if callable(self.items[self.current].action):
-                    self.items[self.current].action()
+                item = self.items[self.current]
+                if callable(item.action):
+                    item.action(self)
                 else:
                     print "Invalid action on item!"
             if x == 2:
