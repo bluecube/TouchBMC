@@ -1,5 +1,4 @@
-import os, pygame
-from pygame.locals import *
+import pygame
 import unicodedata
 
 class Menu:
@@ -7,14 +6,14 @@ class Menu:
     A list of menu items.
     Needs Gui initialized!
     """
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         """
-        Support constructor without params to
-        allow forward declarations (breaking up cycles)
+        Initialize the menu, optional keyword arg current sets the index
+        of the initially active item.
         """
         self.fill(*args)
 
-        self.last_index = 0
+        self.last_index = kwargs.get('current', 0)
         self.parent = None
 
     def fill(self, *args):
@@ -42,18 +41,20 @@ class HierarchicalMenu(Menu):
     A menu that splits the items into alphabetical groups.
     """
 
-    def __init__(self, config, *args):
+    def __init__(self, config, *args, **kwargs):
+        """
+        Initialize the menu, config is the configuration dictionary,
+        optional keyword arg current sets the index
+        of the initially active item.
+        """
         self.font = pygame.font.SysFont(config["HierarchicalMenu font"], config["HierarchicalMenu font size"])
         self.FONT_COLOR = config["HierarchicalMenu font color"]
         self.ANTIALIAS = config["antialias"]
 
-        self.last_index = 0
-        self.parent = None
-
         # dictionary of pre-rendered letters
         self.letters = {}
 
-        self.fill(*args)
+        Menu.__init__(self, *args, **kwargs)
 
     def fill(self, *args):
         """
