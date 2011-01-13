@@ -46,6 +46,9 @@ class HierarchicalMenu(Menu):
 
         self.last_index = 0
 
+        # dictionary of pre-rendered letters
+        self.letters = {}
+
     def fill(self, parent, *args):
         """
         Parameters are reference to a parrent menu, followed
@@ -67,13 +70,15 @@ class HierarchicalMenu(Menu):
         keys.sort()
 
         for key in keys:
-            image = self.font.render(key, self.ANTIALIAS, self.FONT_COLOR)
+            if not self.letters.has_key(key):
+                self.letters[key] = self.font.render(key, self.ANTIALIAS, self.FONT_COLOR)
+
             def helper(key):
                 def action(gui):
                     gui.set_menu(self._get_submenu(key))
                 return action
 
-            self.items.append(MenuItem(image, "", helper(key)))
+            self.items.append(MenuItem(self.letters[key], "", helper(key)))
 
     def _get_letter(self, str):
         """
