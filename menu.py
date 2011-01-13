@@ -7,22 +7,21 @@ class Menu:
     A list of menu items.
     Needs Gui initialized!
     """
-    def __init__(self, parent = None, *args):
+    def __init__(self, *args):
         """
         Support constructor without params to
         allow forward declarations (breaking up cycles)
         """
-        self.fill(parent, *args)
+        self.fill(*args)
 
         self.last_index = 0
+        self.parent = None
 
-    def fill(self, parent, *args):
+    def fill(self, *args):
         """
         Parameters are reference to a parrent menu, followed
         by 3-tuples of image path, item text and item action
         """
-
-        self.parent = parent
         self.items = map(lambda x: MenuItem(*x), args)
 
     def __len__(self):
@@ -31,30 +30,36 @@ class Menu:
     def __getitem__(self, key):
         return self.items[key]
 
+    @staticmethod
+    def action_helper(menu):
+        def action(gui):
+            gui.set_menu(menu)
+        return action
+
 
 class HierarchicalMenu(Menu):
     """
     A menu that splits the items into alphabetical groups.
     """
 
-    def __init__(self, config, parent = None, *args):
+    def __init__(self, config, *args):
         self.font = pygame.font.SysFont(config["HierarchicalMenu font"], config["HierarchicalMenu font size"])
         self.FONT_COLOR = config["HierarchicalMenu font color"]
         self.ANTIALIAS = config["antialias"]
 
-        self.fill(parent, *args)
-
         self.last_index = 0
+        self.parent = None
 
         # dictionary of pre-rendered letters
         self.letters = {}
 
-    def fill(self, parent, *args):
+        self.fill(*args)
+
+    def fill(self, *args):
         """
         Parameters are reference to a parrent menu, followed
         by 3-tuples of image path, item text and item action
         """
-        self.parent = parent
         self.submenu = {}
         self.items = []
 
@@ -95,7 +100,7 @@ class HierarchicalMenu(Menu):
 
     def _get_submenu(self, key):
         if not self.submenu.has_key(key):
-            self.submenu[key] = Menu(self, *self.groups[key])
+            self.submenu[key] = Menu(*self.groups[key])
 
         return self.submenu[key]
 

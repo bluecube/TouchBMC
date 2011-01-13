@@ -4,6 +4,8 @@ import math
 import pygame
 from pygame.locals import *
 
+from menu import Menu
+
 class Gui:
     FPS = 30
     SCROLL_TIME = 0.5 * FPS
@@ -45,35 +47,37 @@ class Gui:
 
         self.current = 0
 
-    def set_menu(self, menu, current = 0):
+    def set_menu(self, menu, current = -1, is_forward = True):
         """
-        Set the current items.
+        Set the current menu to be displayed.
+        current is the index of item that will be selected in the loaded menu.
+        is_forward should be false when using a back link and true otherwise.
         """
 
         try:
             self.items.last_index = self.current
+
+            if is_forward:
+                menu.parent = self.items
         except AttributeError:
             pass
 
         self.anim = 0
         self.items = menu
-        self.current = current
+        if current >= 0:
+            self.current = current
+        else:
+            self.current = menu.last_index
 
         if menu.parent:
-            self.back_action = self.action_helper(menu.parent, menu.parent.last_index)
+            def action(gui):
+                gui.set_menu(menu.parent, is_forward = False)
+
+            self.back_action = action
         else:
             self.back_action = None
 
         self.dirty = True
-
-    def action_helper(self, menu, current = 0):
-        """
-        Creates an action (a function) that changes to a given menu
-        """
-        def action(gui):
-            gui.set_menu(menu, current)
-
-        return action
 
     def set_bg_text(self, text):
         """
