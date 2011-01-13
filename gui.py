@@ -6,9 +6,11 @@ from pygame.locals import *
 from menu import Menu
 
 class Gui:
-    FPS = 30
+    FPS = 20
     SCROLL_TIME = 0.5 * FPS
     DISTANCE = 200
+
+    BG_TEXT_ANIM_SPEED = 1
 
     DISABLED_LINE = 420.0 / 600.0
 
@@ -82,9 +84,16 @@ class Gui:
         """
         Set the text to be displayed on the background.
         The parameter text should be an iterable with lines to display
+        If the first line is too long, starts the line scrolling anim.
         """
         
         self.bg_text = map(lambda str: self.bg_font.render(str, self.ANTIALIAS, self.BG_FONT_COLOR), text)
+
+        self.bg_text_overflow = self.bg_text[0].get_width() - self.screen.get_width()
+
+        self.bg_text_anim = self.bg_text_overflow > 0
+
+        self.bg_text_anim_phase = 0
 
         self.dirty = True
 
@@ -92,15 +101,19 @@ class Gui:
         """
         Step the animation, if applicable.
         """
-        if self.anim == 0:
-            return
+        if self.anim:
+            if self.anim >= self.SCROLL_TIME:
+                self.stop_anim()
+            else:
+                self.anim += 1
 
-        if self.anim >= self.SCROLL_TIME:
-            self.stop_anim()
-        else:
-            self.anim += 1
-
-        self.dirty = True
+            self.dirty = True
+        if self.bg_text_anim:
+            if self.bg_text_anim_phase > self.bg_text_overflow:
+                self.bg_text_anim_phase = 0
+            else:
+                self.bg_text_anim_phase += self.BG_TEXT_ANIM_SPEED
+            self.dirty = True
 
     def xy_from_center(self, img, centerx, centery):
         """
@@ -197,10 +210,13 @@ class Gui:
         Actually draw the background text.
         """
         (offset, y) = self.BG_FONT_POS
-        for line in self.bg_text:
+        x = max(self.screen.get_width() - offset - self.bg_text[0].get_width(), offset) - self.bg_text_anim_phase;
+        self.screen.blit(self.bg_text[0], (x, y))
+
+        for line in self.bg_text[1:]:
             x = self.screen.get_width() - offset - line.get_width();
-            self.screen.blit(line, (x, y))
             y += self.bg_font.get_linesize()
+            self.screen.blit(line, (x, y))
 
     def can_go(self, direction):
         """
@@ -212,6 +228,7 @@ class Gui:
 
         return (direction == self.LEFT and current >= 1) or \
             (direction == self.RIGHT and current < len(self.items) - 1)
+
 
     def start_anim(self, direction):
         """
@@ -248,7 +265,7 @@ class Gui:
         for event in pygame.event.get():
             self.process_event(event)
 
-        if self.anim:
+        if self.anim or self.bg_text_anim:
             self.update()
         else:
             event = pygame.event.wait();
