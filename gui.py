@@ -23,6 +23,8 @@ class Gui:
         pygame.display.set_caption(config["caption"])
         self.screen = pygame.display.get_surface()
 
+        pygame.event.set_allowed([QUIT, MOUSEBUTTONUP])
+
         self.background = pygame.image.load(config["background"]).convert()
         self.left = pygame.image.load(config["left"]).convert_alpha()
         self.right = pygame.image.load(config["right"]).convert_alpha()
@@ -250,6 +252,12 @@ class Gui:
             self.process_event(event);
 
     def process_event(self, event):
+        """
+        Process a single event
+        """
+        # Don't forget to modify the allowed list in the constructor
+        # when adding new events here!
+
         if event.type == QUIT:
             sys.exit()
         elif event.type == MOUSEBUTTONUP:
