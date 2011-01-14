@@ -24,7 +24,7 @@ class Gui:
         pygame.display.set_caption(config["caption"])
         self.screen = pygame.display.get_surface()
 
-        pygame.event.set_allowed([QUIT, MOUSEBUTTONUP])
+        pygame.event.set_allowed([QUIT, MOUSEBUTTONUP, USEREVENT])
 
         self.background = pygame.image.load(config["background"]).convert()
 
@@ -36,6 +36,7 @@ class Gui:
         self.back = self.load_sprite(config["back"],   1 * x_6, 1 * y_6)
 
         self.clock = pygame.time.Clock()
+        pygame.time.set_timer(USEREVENT, 5000)
 
         self.font = pygame.font.SysFont(config["font"], config["font size"])
         self.FONT_COLOR = config["font color"]
@@ -47,9 +48,12 @@ class Gui:
         self.ANTIALIAS = config["antialias"]
         self.FPS = config["fps"]
         self.ANIM_LENGTH = int(config["menu scroll time"] * self.FPS)
+        self.HIDE_FG_COUNTER_TOP = config["hide fg counter top"]
 
         self.disabled_y = int(self.DISABLED_LINE * self.screen.get_height())
 
+        self.hide_fg = True
+        self.hide_fg_counter = 0
         self.current = 0
 
     def load_sprite(self, path, x, y):
@@ -175,6 +179,9 @@ class Gui:
         self.screen.blit(self.background, (0, 0))
 
         self.draw_bg_text()
+
+        if self.hide_fg:
+            return
 
         self.draw_items()
 
@@ -305,11 +312,20 @@ class Gui:
             sys.exit()
         elif event.type == MOUSEBUTTONUP:
             self.process_click(event.pos)
+        elif event.type == USEREVENT:
+            self.process_hide_fg()
 
     def process_click(self, pos):
         """
         Do the correct thing when a click is detected
         """
+
+        self.hide_fg_counter = 0
+        if self.hide_fg:
+            self.hide_fg = False
+            self.draw()
+            return
+
         # we only have nine sensitive areas
         (x, y) = pos
         x = x // (self.screen.get_width() / 3)
@@ -330,6 +346,15 @@ class Gui:
                     print "Invalid action on item!"
             if x == 2:
                 self.start_anim(self.RIGHT)
+
+    def process_hide_fg(self):
+        if self.hide_fg:
+            return
+
+        self.hide_fg_counter += 1
+        if self.hide_fg_counter > self.HIDE_FG_COUNTER_TOP:
+            self.hide_fg = True
+            self.draw()
 
     anim = 0
     anim_direction = LEFT

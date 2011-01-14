@@ -12,6 +12,8 @@ config["fps"] = 20
 
 config["menu scroll time"] = 0.5
 
+config["hide fg counter top"] = 4 # in 5 sec units
+
 config["width"] = 800
 config["height"] = 600
 
