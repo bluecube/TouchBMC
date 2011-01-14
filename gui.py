@@ -6,8 +6,6 @@ from pygame.locals import *
 from menu import Menu
 
 class Gui:
-    FPS = 20
-    SCROLL_TIME = 0.5 * FPS
     DISTANCE = 200
 
     BG_TEXT_ANIM_SPEED = 1
@@ -29,9 +27,13 @@ class Gui:
         pygame.event.set_allowed([QUIT, MOUSEBUTTONUP])
 
         self.background = pygame.image.load(config["background"]).convert()
-        self.left = pygame.image.load(config["left"]).convert_alpha()
-        self.right = pygame.image.load(config["right"]).convert_alpha()
-        self.back = pygame.image.load(config["back"]).convert_alpha()
+
+        x_6 = self.screen.get_width() / 6
+        y_6 = self.screen.get_height() / 6
+
+        self.left = self.load_sprite(config["left"],   1 * x_6, 3 * y_6)
+        self.right = self.load_sprite(config["right"], 5 * x_6, 3 * y_6)
+        self.back = self.load_sprite(config["back"],   1 * x_6, 1 * y_6)
 
         self.clock = pygame.time.Clock()
 
@@ -43,10 +45,24 @@ class Gui:
         self.BG_FONT_POS = config["bg font pos"]
 
         self.ANTIALIAS = config["antialias"]
+        self.FPS = config["fps"]
+        self.ANIM_LENGTH = int(config["menu scroll time"] * self.FPS)
 
         self.disabled_y = int(self.DISABLED_LINE * self.screen.get_height())
 
         self.current = 0
+
+    def load_sprite(self, path, x, y):
+        """
+        Constructs a new sprite, loads it with an image and sets its rect
+        to have a center point at (x, y).
+        """
+        sprite = pygame.sprite.Sprite()
+        sprite.image = pygame.image.load(path).convert_alpha()
+        sprite.rect = sprite.image.get_rect()
+        sprite.rect.center = (x, y)
+
+        return sprite
 
     def set_menu(self, menu, current = -1, is_forward = True):
         """
@@ -78,42 +94,70 @@ class Gui:
         else:
             self.back_action = None
 
-        self.dirty = True
+        self.update()
 
-    def set_bg_text(self, text):
+    def set_bg_text(self, line_number, text):
         """
         Set the text to be displayed on the background.
         The parameter text should be an iterable with lines to display
         If the first line is too long, starts the line scrolling anim.
         """
         
-        self.bg_text = map(lambda str: self.bg_font.render(str, self.ANTIALIAS, self.BG_FONT_COLOR), text)
+        try:
+            if self.bg_text[line_number].text == text:
+                return
+        except IndexError:
+            pass
 
-        self.bg_text_overflow = self.bg_text[0].get_width() - self.screen.get_width()
+        (x_offset, y) = self.BG_FONT_POS
 
-        self.bg_text_anim = self.bg_text_overflow > 0
+        y += line_number * self.bg_font.get_ascent()
 
-        self.bg_text_anim_phase = 0
+        for i in range(len(self.bg_text), line_number + 1):
+            self.bg_text.append(NoText())
 
-        self.dirty = True
+        if text == "":
+            self.bg_text[line_number] = NoText()
+        else:
+            self.bg_text[line_number] = ScrollingText(text, self.bg_font,
+                self.screen, x_offset, y,
+                self.ANTIALIAS, self.BG_FONT_COLOR,
+                self.BG_TEXT_ANIM_SPEED)
 
     def update(self):
         """
         Step the animation, if applicable.
         """
-        if self.anim:
-            if self.anim >= self.SCROLL_TIME:
-                self.stop_anim()
-            else:
-                self.anim += 1
+        if self.anim >= self.ANIM_LENGTH:
+            self.stop_anim()
+        elif self.anim:
+            self.anim += 1
 
-            self.dirty = True
-        if self.bg_text_anim:
-            if self.bg_text_anim_phase > self.bg_text_overflow:
-                self.bg_text_anim_phase = 0
+        t = self.anim / float(self.ANIM_LENGTH)
+
+        x = self.screen.get_width() / 2
+        x -= self.current * self.DISTANCE
+        x -= int(self.anim_direction * self.DISTANCE * (2 * t - t ** 2))
+
+        for i in xrange(len(self.items)):
+            if i == self.current or i == self.current + self.anim_direction:
+                new_t = t
+                if i == self.current:
+                    new_t = 1 - t
+
+                poly = new_t * new_t * (-5 + new_t * (14 + new_t * -8))
+
+                y = int(poly * self.screen.get_height() / 2 + (1 - poly) * self.disabled_y)
             else:
-                self.bg_text_anim_phase += self.BG_TEXT_ANIM_SPEED
-            self.dirty = True
+                y = self.disabled_y
+
+            item = self.items[i]
+            item.rect.center = (x, y)
+
+            x += self.DISTANCE
+
+        for line in self.bg_text:
+            line.update()
 
     def xy_from_center(self, img, centerx, centery):
         """
@@ -125,74 +169,42 @@ class Gui:
 
     def draw(self):
         """
-        Redraw the whole screen, clear the dirty flag.
+        Redraw the whole screen.
         """
         
         self.screen.blit(self.background, (0, 0))
 
-        if len(self.bg_text):
-            self.draw_bg_text()
+        self.draw_bg_text()
 
-        for i in xrange(0, len(self.items)):
-            self.draw_item(i)
+        self.draw_items()
 
         if self.can_go(self.LEFT):
-            self.screen.blit(self.left, \
-                self.xy_from_center(self.left, self.DISTANCE / 2, self.screen.get_height() / 2))
+            self.draw_sprite(self.left)
+
         if self.can_go(self.RIGHT):
-            self.screen.blit(self.right, \
-                self.xy_from_center(self.right, self.screen.get_width() - self.DISTANCE / 2, self.screen.get_height() / 2))
+            self.draw_sprite(self.right)
 
         if self.back_action:
-            self.screen.blit(self.back, \
-                self.xy_from_center(self.back, self.DISTANCE / 2, self.DISTANCE / 2))
+            self.draw_sprite(self.back)
 
-        self.dirty = False
-
-    def draw_item(self, i):
+    def draw_items(self):
         """
-        Draw a single items item to its correct position.
+        Draw menu items and its description text.
         """
-        x = self.screen.get_width() / 2
 
-        # position of item #i if it was not moving
-        x += (i - self.current) * self.DISTANCE 
+        for i in xrange(len(self.items)):
+            item = self.items[i]
+            self.draw_sprite(item)
 
         if self.anim:
-            # animation time (from 0 to 1)
-            t = self.anim / float(self.SCROLL_TIME)
-
-            # position of the anim (quadratic function of time)
-            x -= int(self.anim_direction * self.DISTANCE * (2 * t - t ** 2))
-
-            if i == self.current or i == self.current + self.anim_direction:
-                if i == self.current:
-                    t = 1 - t
-
-                poly = t*t * (-5 + t * (14 + t * -8))
-
-                y = int(poly * self.screen.get_height() / 2 + (1 - poly) * self.disabled_y)
-            else:
-                y = self.disabled_y
-        else:
-            if i == self.current:
-                y = self.screen.get_height() / 2
-            else:
-                y = self.disabled_y
-
-        
-        item = self.items[i]
-        img = item.image
-
-        self.screen.blit(img, self.xy_from_center(img, x, y))
-
-        if self.anim or i != self.current:
             return
         
         #draw the text
 
+        item = self.items[self.current]
+
         if len(item.text) == 0:
-            return;
+            return
 
         try:
             text = item.rendered_text
@@ -200,23 +212,25 @@ class Gui:
             text = self.font.render(item.text, self.ANTIALIAS, self.FONT_COLOR)
             item.rendered_text = text
 
-        x += img.get_width() / 2 - text.get_width();
-        y -= img.get_height() / 2 + self.font.get_ascent();
+        (x, y) = item.rect.midtop
+
+        x -= text.get_width() / 2;
+        y -= self.font.get_ascent();
 
         self.screen.blit(text, (x, y))
+
+    def draw_sprite(self, sprite):
+        """
+        Draws a sprite to the position given by its rect
+        """
+        self.screen.blit(sprite.image, sprite.rect.topleft)
 
     def draw_bg_text(self):
         """
         Actually draw the background text.
         """
-        (offset, y) = self.BG_FONT_POS
-        x = max(self.screen.get_width() - offset - self.bg_text[0].get_width(), offset) - self.bg_text_anim_phase;
-        self.screen.blit(self.bg_text[0], (x, y))
-
-        for line in self.bg_text[1:]:
-            x = self.screen.get_width() - offset - line.get_width();
-            y += self.bg_font.get_linesize()
-            self.screen.blit(line, (x, y))
+        for line in self.bg_text:
+            line.draw(self.screen)
 
     def can_go(self, direction):
         """
@@ -258,18 +272,27 @@ class Gui:
         """
         self.clock.tick(self.FPS)
 
-        if self.dirty:
-            self.draw()
-            pygame.display.flip()
+        self.draw()
+        pygame.display.flip()
 
         for event in pygame.event.get():
             self.process_event(event)
 
-        if self.anim or self.bg_text_anim:
+        if self.need_ticks():
             self.update()
         else:
             event = pygame.event.wait();
             self.process_event(event);
+
+    def need_ticks(self):
+        if self.anim:
+            return True
+
+        for line in self.bg_text:
+            if line.anim:
+                return True
+
+        return False 
 
     def process_event(self, event):
         """
@@ -308,10 +331,71 @@ class Gui:
             if x == 2:
                 self.start_anim(self.RIGHT)
 
-    dirty = False
-
     anim = 0
     anim_direction = LEFT
 
     back_action = 0
-    bg_text = ()
+    bg_text = []
+    
+
+class ScrollingText():
+    """
+    One line of text that is possibly scrolling.
+    """
+
+    def __init__(self, text, font, screen, x_offset, y, antialias, color, anim_speed):
+        """
+        text: string to render
+        font: font object
+        screen: screen to draw to
+        x_offset: offset from the right corner of the screen
+        y: y coordinate of the screen
+        anim_speed: how many pixels per frame to move
+        """
+
+        self.rendered = font.render(text, antialias, color)
+        self.text = text;
+
+        self.anim_speed = anim_speed
+
+        effective_width = screen.get_width() - 2 * x_offset
+
+        self.anim = (effective_width < self.rendered.get_width())
+
+        self.anim_state = 0
+
+        (space_width, x) = font.size(" ")
+        self.anim_len = self.rendered.get_width() + space_width
+
+        if self.anim:
+            self.rect = Rect(0, y, screen.get_width(), self.rendered.get_height())
+        else:
+            x = screen.get_width() - self.rendered.get_width() - x_offset
+            self.rect = Rect(x, y, self.rendered.get_width(), self.rendered.get_height())
+
+    def draw(self, screen):
+        """
+        Draw the text to the given screen
+        """
+
+        if self.anim:
+            screen.blit(self.rendered, (-self.anim_state, self.rect.top))
+            screen.blit(self.rendered, (self.anim_len - self.anim_state, self.rect.top))
+        else:
+            screen.blit(self.rendered, self.rect.topleft)
+
+    def update(self):
+        self.anim_state += self.anim_speed
+
+        if(self.anim_state >= self.anim_len):
+            self.anim_state -= self.anim_len
+
+class NoText:
+    anim = False
+    text = ""
+
+    def update(self):
+        pass
+
+    def draw(self, screen):
+        pass

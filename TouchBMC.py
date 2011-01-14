@@ -46,7 +46,10 @@ root_menu = Menu(
 
 gui.set_menu(root_menu)
 
-gui.set_bg_text(("Playing: Robert Balzar Trio - In Your Own Sweet Way", "05:24 / 05:48"))
+gui.set_bg_text(0, "In Your Own Sweet Way")
+gui.set_bg_text(1, "Robert Balzar Trio")
+gui.set_bg_text(2, "Alone (disc 2)")
+gui.set_bg_text(3, "05:24 / 05:48")
 
 while True:
     gui.work();

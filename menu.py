@@ -1,5 +1,6 @@
 import pygame
 import unicodedata
+from pygame.rect import Rect
 
 class Menu:
     """
@@ -106,7 +107,7 @@ class HierarchicalMenu(Menu):
         return self.submenu[key]
 
 
-class MenuItem:
+class MenuItem():
     """
     A simple menu item with an image, text and an action.
     Needs Gui initialized!
@@ -117,5 +118,8 @@ class MenuItem:
             self.image = image
         else:
             self.image = pygame.image.load(image).convert_alpha()
+
+        self.rect = Rect(0, 0, self.image.get_width(), self.image.get_height())
+
         self.text = text
         self.action = action

@@ -8,6 +8,9 @@ config["back"] = "left.png"
 config["caption"] = "TouchBMC"
 
 config["antialias"] = True
+config["fps"] = 20
+
+config["menu scroll time"] = 0.5
 
 config["width"] = 800
 config["height"] = 600
