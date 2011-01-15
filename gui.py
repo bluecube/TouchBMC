@@ -199,6 +199,9 @@ class Gui:
         Draw menu items and its description text.
         """
 
+        if not len(self.items):
+            return
+
         for i in xrange(len(self.items)):
             item = self.items[i]
             self.draw_sprite(item)

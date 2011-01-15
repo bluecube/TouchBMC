@@ -23,6 +23,7 @@ class Menu:
         by 3-tuples of image path, item text and item action
         """
         self.items = map(lambda x: MenuItem(*x), args)
+        self.last_index = 0
 
     def __len__(self):
         return len(self.items)
@@ -65,10 +66,12 @@ class HierarchicalMenu(Menu):
         self.submenu = {}
         self.items = []
 
+        self.last_index = 0
+
         if len(args) == 0:
             return
 
-        self.groups = {};
+        self.groups = {}
         for item in args:
             (image, text, action) = item
             self.groups.setdefault(self._get_letter(text), []).append(item)
