@@ -121,12 +121,8 @@ class MenuItem():
     """
     def __init__(self, image, text, action):
         "Construct the menu item, load its image."
-        if isinstance(image, pygame.Surface):
-            self.image = image
-        else:
-            self.image = pygame.image.load(image).convert_alpha()
-
-        self.rect = Rect(0, 0, self.image.get_width(), self.image.get_height())
+        self.image = image
+        self.rect = image.get_rect()
 
         self.text = text
         self.action = action

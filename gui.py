@@ -1,8 +1,5 @@
-import sys
-import math
 import pygame
 from pygame.locals import *
-import math
 
 from menu import Menu
 
@@ -51,14 +48,13 @@ class Gui:
         self.HIDE_FG_COUNTER_TOP = config["hide fg counter top"]
         self.DISTANCE = config["item distance"]
         self.DRAG_OFFSET = config["drag offset"]
-        self.DRAG_INIT_LENGTH = config["drag init length"]
+        self.DRAG_AREA = config["drag area"]
 
         self.disabled_y = int(self.DISABLED_LINE * self.screen.get_height())
 
         self.hide_fg = True
         self.hide_fg_counter = 0
         self.current = 0
-        self.mousedown_pos = None
         self.dragging = False
 
     def load_sprite(self, path, x, y, cache):
@@ -335,23 +331,23 @@ class Gui:
         if self.hide_fg:
             return
 
-        self.mousedown_pos = pos
-        self.dragging = False
+        (x, y) = pos
+
+        self.dragging = y > self.DRAG_AREA
+
+        if self.dragging:
+            self.process_mousemotion(pos)
 
     def process_mousemotion(self, pos):
         """
         Handle drawing.
         """
 
-        if not self.mousedown_pos:
+        if not self.dragging:
             return
-
+        
         self.hide_fg_counter = 0
 
-        if not self.dragging:
-            if self.drag_length(pos) > self.DRAG_INIT_LENGTH:
-                self.dragging = True
-        
         (x, y) = pos
         i = ((len(self.items) * (x - self.DRAG_OFFSET)) //
             (self.screen.get_width() - 2 * self.DRAG_OFFSET))
@@ -361,27 +357,10 @@ class Gui:
         elif i >= len(self.items):
             i = len(self.items) - 1
 
-        if i == self.current:
-            return;
-        else:
-            if i > self.current:
-                direction = self.RIGHT
-            else:
-                direction = self.LEFT
-
-            i -= direction
-            if self.current != i or not self.anim:
-                self.current = i - direction
-                self.start_anim(direction)
-
-    def drag_length(self, pos):
-        x1, y1 = self.mousedown_pos
-        x2, y2 = pos
-
-        x = x1 - x2
-        y = y1 - y2
-
-        return math.sqrt(x * x + y * y)
+        if self.current != i:
+            self.current = i
+            self.update()
+            self.draw()
 
     def process_mouseup(self, pos):
         """
@@ -390,10 +369,8 @@ class Gui:
 
         self.hide_fg_counter = 0
 
-        was_dragging = self.dragging
-        self.dragging = False
-        self.mousedown_pos = None
-        if was_dragging:
+        if self.dragging:
+            self.dragging = False
             return
 
         if self.hide_fg:
