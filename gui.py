@@ -93,13 +93,19 @@ class Gui:
 
         if menu.parent:
             def action(gui):
-                gui.set_menu(menu.parent, is_forward = False)
+                gui.back()
 
             self.back_action = action
         else:
             self.back_action = None
 
         self.update()
+
+    def go_back(self):
+        """
+        Move to the parent menu or do nothing if there is no parent.
+        """
+        self.set_menu(self.items.parent, is_forward = False)
 
     def set_bg_text(self, line_number, text):
         """

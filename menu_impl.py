@@ -76,9 +76,13 @@ class MenuImpl:
 
             self.artists_menu.fill(*map(convert, result["artists"]))
             Menu.action_helper(self.artists_menu)(gui)
+        
+        def poweroff_action(gui):
+            gui.go_back()
+            xbmc.call.System.Suspend()
 
         self.power_menu = Menu(
-            MenuItem(cache.open(config["shutdown"]), "Power off", 0),
+            MenuItem(cache.open(config["shutdown"]), "Power off", poweroff_action),
             MenuItem(cache.open(config["exit"]), "Exit", lambda gui: sys.exit()),
         )
 
