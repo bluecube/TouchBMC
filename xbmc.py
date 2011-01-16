@@ -1,11 +1,11 @@
 import urllib
 import os
 
-import jsonrpc2
+import json_rpc2_proxy
 
 class Xbmc:
     def __init__(self, config):
-        self.call = jsonrpc2.JsonRPCProxy((config["host"], config["port"]))
+        self.call = json_rpc2_proxy.JsonRPCProxy((config["host"], config["port"]))
 
         self.CACHE_DIR = config["cache dir"]
 
