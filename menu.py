@@ -71,6 +71,11 @@ class HierarchicalMenu(Menu):
         if len(args) == 0:
             return
 
+        # TODO: Hard coded max length?
+        if len(args) < 30:
+            Menu.fill(self, *args)
+            return
+
         self.groups = {}
         for item in args:
             self.groups.setdefault(self._get_letter(item.text), []).append(item)
