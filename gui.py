@@ -140,29 +140,36 @@ class Gui:
 
         t = self.anim / float(self.ANIM_LENGTH)
 
-        x = self.screen.get_width() / 2
-        x -= self.current * self.DISTANCE
-        x -= int(self.anim_direction * self.DISTANCE * (2 * t - t ** 2))
-
-        for i in xrange(len(self.items)):
-            if i == self.current or i == self.current + self.anim_direction:
-                new_t = t
-                if i == self.current:
-                    new_t = 1 - t
-
-                poly = new_t * new_t * (-5 + new_t * (14 + new_t * -8))
-
-                y = int(poly * self.screen.get_height() / 2 + (1 - poly) * self.disabled_y)
-            else:
-                y = self.disabled_y
-
-            item = self.items[i]
-            item.rect.center = (x, y)
-
-            x += self.DISTANCE
+        if self.anim_direction >= 0:
+            t = (2 * t - t ** 2)
+            self.update_items(self.current, t)
+        else:
+            t = (2 * t - t ** 2)
+            self.update_items(self.current - 1, 1 - t)
 
         for line in self.bg_text:
             line.update()
+
+    def update_items(self, current, t):
+        x = self.screen.get_width() / 2
+        x -= current * self.DISTANCE
+        x -= int(self.DISTANCE * t)
+
+        for i in xrange(len(self.items)):
+            self.items[i].rect.center = (x, self.disabled_y)
+            x += self.DISTANCE
+
+        if t > 0 and t < 1:
+            poly = t * t * (-5 + t * (14 + t * -8))
+            y = int(poly * self.screen.get_height() / 2 + (1 - poly) * self.disabled_y)
+            self.items[current+1].rect.centery = y
+
+            t = 1 - t
+            poly = t * t * (-5 + t * (14 + t * -8))
+            y = int(poly * self.screen.get_height() / 2 + (1 - poly) * self.disabled_y)
+            self.items[current].rect.centery = y
+        else:
+            self.items[current + int(t)].rect.centery = self.screen.get_height() / 2
 
     def xy_from_center(self, img, centerx, centery):
         """
@@ -340,7 +347,7 @@ class Gui:
 
     def process_mousemotion(self, pos):
         """
-        Handle drawing.
+        Handle dragging.
         """
 
         if not self.dragging:
@@ -349,19 +356,24 @@ class Gui:
         self.hide_fg_counter = 0
 
         (x, y) = pos
-        i = ((len(self.items) * (x - self.DRAG_OFFSET)) //
-            (self.screen.get_width() - 2 * self.DRAG_OFFSET))
+        fractional = ((len(self.items) * (x - self.DRAG_OFFSET)) /
+            float(self.screen.get_width() - 2 * self.DRAG_OFFSET))
 
-        if i < 0:
-            i = 0
-        elif i >= len(self.items):
-            i = len(self.items) - 1
-
-        if self.current != i:
-            self.current = i
-            self.update()
-            self.draw()
-
+        if fractional < 0.5:
+            fractional = 0.5
+        elif fractional > len(self.items) - 0.5:
+            fractional = len(self.items) - 0.5
+        
+        self.current = int(fractional)
+        fractional -= 0.5
+        
+        self.update_items(int(fractional), fractional - int(fractional))
+        
+    def stop_dragging(self):
+        self.dragging = False
+        self.update_items(self.current, 0)
+        self.draw()
+        
     def process_mouseup(self, pos):
         """
         Do the correct thing when a click is detected
@@ -370,7 +382,7 @@ class Gui:
         self.hide_fg_counter = 0
 
         if self.dragging:
-            self.dragging = False
+            self.stop_dragging()
             return
 
         if self.hide_fg:
