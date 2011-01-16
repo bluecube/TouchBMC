@@ -1,16 +1,18 @@
 #!/usr/bin/python
 
-import pygame
-import sys
+from image_cache import ImageCache
+from xbmc import Xbmc
+from gui import Gui
+from menu_impl import MenuImpl
 
 from config import config
-from gui import Gui
 
-gui = Gui(config)
+cache = ImageCache(config)
+gui = Gui(config, cache)
+xbmc = Xbmc(config)
+menu = MenuImpl(config, xbmc, cache)
 
-import menu_impl
-
-gui.set_menu(menu_impl.root_menu)
+gui.set_menu(menu.get_root_menu())
 
 gui.set_bg_text(0, "In Your Own Sweet Way")
 gui.set_bg_text(1, "Robert Balzar Trio")

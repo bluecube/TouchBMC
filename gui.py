@@ -15,7 +15,7 @@ class Gui:
     LEFT = -1
     RIGHT = 1
 
-    def __init__(self, config):
+    def __init__(self, config, cache):
         # only initialize what we really need
         pygame.display.init()
         pygame.font.init()
@@ -31,9 +31,9 @@ class Gui:
         x_6 = self.screen.get_width() / 6
         y_6 = self.screen.get_height() / 6
 
-        self.left = self.load_sprite(config["left"],   1 * x_6, 3 * y_6)
-        self.right = self.load_sprite(config["right"], 5 * x_6, 3 * y_6)
-        self.back = self.load_sprite(config["back"],   1 * x_6, 1 * y_6)
+        self.left = self.load_sprite(config["left"],   1 * x_6, 3 * y_6, cache)
+        self.right = self.load_sprite(config["right"], 5 * x_6, 3 * y_6, cache)
+        self.back = self.load_sprite(config["back"],   1 * x_6, 1 * y_6, cache)
 
         self.clock = pygame.time.Clock()
         pygame.time.set_timer(USEREVENT, 5000)
@@ -56,13 +56,13 @@ class Gui:
         self.hide_fg_counter = 0
         self.current = 0
 
-    def load_sprite(self, path, x, y):
+    def load_sprite(self, path, x, y, cache):
         """
         Constructs a new sprite, loads it with an image and sets its rect
         to have a center point at (x, y).
         """
         sprite = pygame.sprite.Sprite()
-        sprite.image = pygame.image.load(path).convert_alpha()
+        sprite.image = cache.open(path)
         sprite.rect = sprite.image.get_rect()
         sprite.rect.center = (x, y)
 

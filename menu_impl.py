@@ -1,82 +1,94 @@
 from menu import MenuItem, Menu, HierarchicalMenu
-from xbmc import Xbmc
 from config import config
 import sys
 
-xbmc = Xbmc(config)
-
-def tracks_action(gui, album_id = None):
-    pass
-
-def albums_action(gui, artist_id = None):
+class MenuImpl:
     """
-    Load the list of artists from the XBMC and display the menu.
+    Class that implements the concrete menus for touchbmc.
     """
-    
-    if artist_id:
-        result = xbmc.call.AudioLibrary.GetAlbums(artistid = artist_id)
-    else:
-        result = xbmc.call.AudioLibrary.GetAlbums()
 
-    def convert(album):
-        text = album["label"]
-        if 'thumbnail' in album:
-            image = xbmc.get_file(album["thumbnail"])
-        else:
-            image = "circle.png"
+    def __init__(self, config, xbmc, cache):
+        self.cache = cache
+        self.config = config
 
-        def action(gui2):
-            tracks_action(gui2, album["albumid"])
+        self.albums_menu = HierarchicalMenu(config)
+        self.artists_menu = HierarchicalMenu(config)
 
-        return (image, text, action)
+        def tracks_action(gui, album_id = None):
+            pass
 
-    albums_action.menu.fill(*map(convert, result["albums"]))
+        def albums_action(gui, artist_id = None):
+            """
+            Load the list of artists from the XBMC and display the menu.
+            """
+            
+            if artist_id:
+                result = xbmc.call.AudioLibrary.GetAlbums(artistid = artist_id)
+            else:
+                result = xbmc.call.AudioLibrary.GetAlbums()
 
-    Menu.action_helper(albums_action.menu)(gui)
+            def convert(album):
+                text = album["label"]
+                if album.has_key('thumbnail'):
+                    image = self.cache.open_http(album["thumbnail"])
+                else:
+                    image = self.cache.open(self.config["default album"])
 
-def artists_action(gui):
-    """
-    Load the list of artists from the XBMC and display the menu.
-    """
-    
-    result = xbmc.call.AudioLibrary.GetArtists()
+                def action(gui2):
+                    tracks_action(gui2, album["albumid"])
 
-    def convert(artist):
-        text = artist["label"]
-        if 'thumbnail' in artist:
-            image = xbmc.get_file(artist["thumbnail"])
-        else:
-            image = "circle.png"
+                return MenuItem(image, text, action)
 
-        def action(gui2):
-            albums_action(gui2, artist["artistid"])
+            self.albums_menu.fill(*map(convert, result["albums"]))
+            Menu.action_helper(self.albums_menu)(gui)
 
-        return (image, text, action)
+        def artists_action(gui):
+            """
+            Load the list of artists from the XBMC and display the menu.
+            """
+            
+            result = xbmc.call.AudioLibrary.GetArtists()
 
-    artists_action.menu.fill(*map(convert, result["artists"]))
+            def convert(artist):
+                text = artist["label"]
+                if artist.has_key('thumbnail'):
+                    image = self.cache.open_http(artist["thumbnail"])
+                else:
+                    image = self.cache.open(self.config["default artist"])
 
-    Menu.action_helper(artists_action.menu)(gui)
+                def action(gui2):
+                    albums_action(gui2, artist["artistid"])
 
-artists_action.menu = HierarchicalMenu(config)
-albums_action.menu = HierarchicalMenu(config)
+                return MenuItem(image, text, action)
 
-library_menu = Menu(
-    ("circle.png", "Artists ...", artists_action),
-    ("circle.png", "Albums ...", albums_action),
-)
+            self.artists_menu.fill(*map(convert, result["artists"]))
+            Menu.action_helper(self.artists_menu)(gui)
 
-power_menu = Menu(
-    ("power.png", "Power off", 0),
-    ("close.png", "Exit", lambda gui: sys.exit()),
-)
+        self.power_menu = Menu(
+            MenuItem(cache.open(config["shutdown"]), "Power off", 0),
+            MenuItem(cache.open(config["exit"]), "Exit", lambda gui: sys.exit()),
+        )
 
-root_menu = Menu(
-    ("prev.png", "Previous", 0),
-    ("circle.png", "Library ...", Menu.action_helper(library_menu)),
-    ("play.png", "Play", 0),
-    ("next.png", "Next", 0),
-    ("stop.png", "Stop", 0),
-    ("power.png", "Power ...", Menu.action_helper(power_menu)),
-    current = 2
-)
+        self.library_menu = Menu(
+            MenuItem(cache.open(config["artists"]), "Artists ...", artists_action),
+            MenuItem(cache.open(config["albums"]), "Albums ...", albums_action),
+        )
+
+        self.root = Menu(
+            MenuItem(cache.open(config["prev"]), "Previous", 0),
+            MenuItem(cache.open(config["library"]), "Library ...",
+                Menu.action_helper(self.library_menu)),
+            MenuItem(cache.open(config["play"]), "Play", 0),
+            MenuItem(cache.open(config["next"]), "Next", 0),
+            MenuItem(cache.open(config["stop"]), "Stop", 0),
+            MenuItem(cache.open(config["power"]), "Power ...",
+                Menu.action_helper(self.power_menu)),
+            current = 2
+        )
+
+    def get_root_menu(self):
+        return self.root
+
+
+
 

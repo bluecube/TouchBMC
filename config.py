@@ -5,6 +5,20 @@ config["left"] = "left.png"
 config["right"] = "right.png"
 config["back"] = "left.png"
 
+config["prev"] = "prev.png"
+config["library"] = "circle.png"
+config["next"] = "next.png"
+config["play"] = "play.png"
+config["next"] = "next.png"
+config["stop"] = "stop.png"
+config["power"] = "power.png"
+config["shutdown"] = "power.png"
+config["exit"] = "close.png"
+config["artists"] = "circle.png"
+config["albums"] = "circle.png"
+config["default artist"] = "circle.png"
+config["default album"] = "circle.png"
+
 config["caption"] = "TouchBMC"
 
 config["antialias"] = True

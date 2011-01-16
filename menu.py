@@ -22,7 +22,7 @@ class Menu:
         Parameters are reference to a parrent menu, followed
         by 3-tuples of image path, item text and item action
         """
-        self.items = map(lambda x: MenuItem(*x), args)
+        self.items = args
         self.last_index = 0
 
     def __len__(self):
@@ -43,6 +43,9 @@ class HierarchicalMenu(Menu):
     A menu that splits the items into alphabetical groups.
     """
 
+    # dictionary of pre-rendered letters
+    letters = {}
+
     def __init__(self, config, *args, **kwargs):
         """
         Initialize the menu, config is the configuration dictionary,
@@ -52,9 +55,6 @@ class HierarchicalMenu(Menu):
         self.font = pygame.font.SysFont(config["HierarchicalMenu font"], config["HierarchicalMenu font size"])
         self.FONT_COLOR = config["HierarchicalMenu font color"]
         self.ANTIALIAS = config["antialias"]
-
-        # dictionary of pre-rendered letters
-        self.letters = {}
 
         Menu.__init__(self, *args, **kwargs)
 
@@ -73,15 +73,14 @@ class HierarchicalMenu(Menu):
 
         self.groups = {}
         for item in args:
-            (image, text, action) = item
-            self.groups.setdefault(self._get_letter(text), []).append(item)
+            self.groups.setdefault(self._get_letter(item.text), []).append(item)
 
         keys = self.groups.keys()
         keys.sort()
 
         for key in keys:
-            if not self.letters.has_key(key):
-                self.letters[key] = self.font.render(key, self.ANTIALIAS, self.FONT_COLOR)
+            if not HierarchicalMenu.letters.has_key(key):
+                HierarchicalMenu.letters[key] = self.font.render(key, self.ANTIALIAS, self.FONT_COLOR)
 
             def helper(key):
                 def action(gui):
