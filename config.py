@@ -27,7 +27,7 @@ config["menu scroll time"] = 0.5
 config["hide fg counter top"] = 4 # in 5 sec units
 config["item distance"] = 200
 config["drag offset"] = 50
-config["drag init length"] = 30
+config["drag area"] = 550
 
 config["width"] = 800
 config["height"] = 600
