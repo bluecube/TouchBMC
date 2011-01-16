@@ -31,7 +31,7 @@ class ImageCache:
         cached_path = os.path.join(self.CACHE_DIR, path)
 
         if not os.path.exists(cached_path):
-            urllib.urlretrieve(self.DL_URL + name, cached_path)
+            urllib.urlretrieve(self.DL_URL + path, cached_path)
         
         return self.open(cached_path, modify_func)
 
