@@ -1,6 +1,7 @@
 from menu import MenuItem, Menu, HierarchicalMenu
 from config import config
 import sys
+import pygame
 
 class MenuImpl:
     """
@@ -13,6 +14,18 @@ class MenuImpl:
 
         self.albums_menu = HierarchicalMenu(config)
         self.artists_menu = HierarchicalMenu(config)
+
+        def image_convert(image):
+            """
+            Change the image to the correct size
+            """
+
+            width = int(config["item distance"] * 0.9)
+            if image.get_width() > width:
+                height = int(image.get_height() * float(width) / image.get_width())
+                image = pygame.transform.smoothscale(image, (width, height))
+
+            return image.convert_alpha()
 
         def tracks_action(gui, album_id = None):
             pass
@@ -30,7 +43,7 @@ class MenuImpl:
             def convert(album):
                 text = album["label"]
                 if album.has_key('thumbnail'):
-                    image = self.cache.open_http(album["thumbnail"])
+                    image = self.cache.open_http(album["thumbnail"], image_convert)
                 else:
                     image = self.cache.open(self.config["default album"])
 
@@ -52,7 +65,7 @@ class MenuImpl:
             def convert(artist):
                 text = artist["label"]
                 if artist.has_key('thumbnail'):
-                    image = self.cache.open_http(artist["thumbnail"])
+                    image = self.cache.open_http(artist["thumbnail"], image_convert)
                 else:
                     image = self.cache.open(self.config["default artist"])
 
@@ -88,7 +101,4 @@ class MenuImpl:
 
     def get_root_menu(self):
         return self.root
-
-
-
 

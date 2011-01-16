@@ -22,11 +22,11 @@ config["default album"] = "circle.png"
 config["caption"] = "TouchBMC"
 
 config["antialias"] = True
+
 config["fps"] = 20
-
 config["menu scroll time"] = 0.5
-
 config["hide fg counter top"] = 4 # in 5 sec units
+config["item distance"] = 200
 
 config["width"] = 800
 config["height"] = 600

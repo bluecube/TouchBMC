@@ -6,7 +6,6 @@ from pygame.locals import *
 from menu import Menu
 
 class Gui:
-    DISTANCE = 200
 
     BG_TEXT_ANIM_SPEED = 1
 
@@ -49,6 +48,7 @@ class Gui:
         self.FPS = config["fps"]
         self.ANIM_LENGTH = int(config["menu scroll time"] * self.FPS)
         self.HIDE_FG_COUNTER_TOP = config["hide fg counter top"]
+        self.DISTANCE = config["item distance"]
 
         self.disabled_y = int(self.DISABLED_LINE * self.screen.get_height())
 
