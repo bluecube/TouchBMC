@@ -19,7 +19,7 @@ class Gui:
         pygame.display.init()
         pygame.font.init()
 
-        pygame.display.set_mode((config["width"], config["height"]))#, pygame.FULLSCREEN)
+        pygame.display.set_mode((config["width"], config["height"]), pygame.NOFRAME)# pygame.FULLSCREEN)
         pygame.display.set_caption(config["caption"])
         self.screen = pygame.display.get_surface()
 
