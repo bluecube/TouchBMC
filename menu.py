@@ -16,6 +16,7 @@ class Menu:
 
         self.last_index = kwargs.get('current', 0)
         self.parent = None
+        self.title = ""
 
     def fill(self, *args):
         """

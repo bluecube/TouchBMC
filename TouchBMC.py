@@ -12,7 +12,7 @@ gui = Gui(config, cache)
 xbmc = Xbmc(config)
 menu = MenuImpl(config, xbmc, cache)
 
-gui.set_menu(menu.get_root_menu())
+gui.set_root_menu(menu.get_root_menu())
 
 gui.set_bg_text(0, "In Your Own Sweet Way")
 gui.set_bg_text(1, "Robert Balzar Trio")

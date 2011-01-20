@@ -52,6 +52,8 @@ class Gui:
 
         self.disabled_y = int(self.DISABLED_LINE * self.screen.get_height())
 
+        self.items = None
+
         self.hide_fg = True
         self.hide_fg_counter = 0
         self.current = 0
@@ -69,6 +71,16 @@ class Gui:
 
         return sprite
 
+    def set_root_menu(self, menu):
+        """
+        This is a simplified version of set_menu that doesn't do anything
+        like keeping back links and such stuff.
+        """
+        self.items = menu
+        self.current = menu.last_index
+
+        self.update()
+
     def set_menu(self, menu, current = -1, is_forward = True):
         """
         Set the current menu to be displayed.
@@ -76,13 +88,18 @@ class Gui:
         is_forward should be false when using a back link and true otherwise.
         """
 
-        try:
-            self.items.last_index = self.current
+        self.items.last_index = self.current
 
-            if is_forward:
-                menu.parent = self.items
-        except AttributeError:
-            pass
+        if is_forward:
+            menu.parent = self.items
+
+            title = self.items[self.current].text
+            if title:
+                menu.title = title
+            else:
+                # if the current menu item has no title copy the
+                # title of the last menu
+                menu.title = self.items.title
 
         self.anim = 0
         self.items = menu
@@ -99,6 +116,7 @@ class Gui:
         else:
             self.back_action = None
 
+        print "title is: " + self.items.title
         self.update()
 
     def go_back(self):
