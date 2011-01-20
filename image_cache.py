@@ -19,9 +19,11 @@ class ImageCache:
 
         self.cache = weakref.WeakValueDictionary()
 
-    def open_http(self, path, modify_func = None):
+    def open_http(self, path, alternate_path = None, modify_func = None):
         """
         Returns a cached version of remote image.
+        alternate_path is a path to a local image that is used if the remote
+        image cannot be retreived.
         If modify_func is callable then it is given the 
         opened picture and its return value is stored in the cache.
         If modify_func is not callable convert_alpha() is used.
@@ -31,7 +33,15 @@ class ImageCache:
         cached_path = os.path.join(self.CACHE_DIR, path)
 
         if not os.path.exists(cached_path):
-            urllib.urlretrieve(self.DL_URL + path, cached_path)
+            url = self.DL_URL + path
+            try:
+                urllib.urlretrieve(url, cached_path)
+            except IOError:
+                print "Retreiving remote image " + url + " failed."
+                if alternate_path:
+                    return self.open(alternate_path, modify_func)
+                else:
+                    raise
         
         return self.open(cached_path, modify_func)
 

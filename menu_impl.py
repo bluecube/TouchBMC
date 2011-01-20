@@ -43,7 +43,9 @@ class MenuImpl:
             def convert(album):
                 text = album["label"]
                 if album.has_key('thumbnail'):
-                    image = self.cache.open_http(album["thumbnail"], image_convert)
+                    image = self.cache.open_http(
+                        album["thumbnail"], self.config["default album"],
+                        image_convert)
                 else:
                     image = self.cache.open(self.config["default album"])
 
@@ -65,7 +67,9 @@ class MenuImpl:
             def convert(artist):
                 text = artist["label"]
                 if artist.has_key('thumbnail'):
-                    image = self.cache.open_http(artist["thumbnail"], image_convert)
+                    image = self.cache.open_http(
+                        artist["thumbnail"], self.config["default artist"],
+                        image_convert)
                 else:
                     image = self.cache.open(self.config["default artist"])
 
