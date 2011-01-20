@@ -93,7 +93,7 @@ class Gui:
 
         if menu.parent:
             def action(gui):
-                gui.back()
+                gui.go_back()
 
             self.back_action = action
         else:
