@@ -20,11 +20,23 @@ class MenuImpl:
             Change the image to the correct size
             """
 
-            width = int(config["item distance"] * 0.9)
-            if image.get_width() > width:
-                height = int(image.get_height() * float(width) / image.get_width())
-                image = pygame.transform.smoothscale(image, (width, height))
+            allowed_width = int(config["item distance"] * 0.9)
+            allowed_height = int(config["height"] * 0.5)
+            
+            if image.get_width() < allowed_width and image.get_height < allowed_height:
+                return image.convert_alpha()
 
+            aspect = image.get_width() / float(image.get_height())
+            allowed_aspect = allowed_width / float(allowed_height)
+
+            if aspect > allowed_aspect:
+                width = allowed_width
+                height = int(allowed_width / aspect)
+            else:
+                width = int(allowed_height * aspect)
+                height = allowed_height
+
+            image = pygame.transform.smoothscale(image, (width, height))
             return image.convert_alpha()
 
         def tracks_action(gui, album_id = None):
