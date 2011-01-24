@@ -25,6 +25,7 @@ class Menu:
         """
         self.items = args
         self.last_index = 0
+        self.bar_image = None
 
     def __len__(self):
         return len(self.items)
@@ -68,6 +69,7 @@ class HierarchicalMenu(Menu):
         self.items = []
 
         self.last_index = 0
+        self.bar_image = None
 
         if len(args) == 0:
             return

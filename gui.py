@@ -59,6 +59,13 @@ class Gui:
         self.current = 0
         self.dragging = False
 
+        self.bar = pygame.sprite.Sprite()
+        self.bar.rect = pygame.rect.Rect(
+            self.DRAG_OFFSET,
+            self.DRAG_AREA,
+            self.screen.get_width() - 2 * self.DRAG_OFFSET,
+            self.screen.get_height() - self.DRAG_AREA)
+
     def load_sprite(self, path, x, y, cache):
         """
         Constructs a new sprite, loads it with an image and sets its rect
@@ -76,8 +83,12 @@ class Gui:
         This is a simplified version of set_menu that doesn't do anything
         like keeping back links and such stuff.
         """
+
+
         self.items = menu
         self.current = menu.last_index
+
+        self.generate_bar()
 
         self.update()
 
@@ -117,6 +128,8 @@ class Gui:
             self.back_action = None
 
         print "title is: " + self.items.title
+
+        self.generate_bar()
         self.update()
 
     def go_back(self):
@@ -209,6 +222,8 @@ class Gui:
         """
         
         self.screen.blit(self.background, (0, 0))
+
+        self.draw_sprite(self.bar)
 
         self.draw_bg_text()
 
@@ -443,6 +458,55 @@ class Gui:
         if self.hide_fg_counter > self.HIDE_FG_COUNTER_TOP:
             self.hide_fg = True
             self.draw()
+
+    def generate_bar(self):
+        """
+        Generate the little pictures to show on the bottom of the screen, or
+        load it from the menu.
+        """
+        if self.items.bar_image:
+            self.bar.image = self.items.bar_image
+            return
+
+        bar = pygame.Surface(self.bar.rect.size, SRCALPHA)
+        bar.fill((0, 0, 0, 0))
+
+
+        #if len(self.items) > 30:
+        #    self.items.bar_image = bar
+        #    self.bar.image = bar
+        #    return #TODO something should be done here
+
+        bin_width = self.bar.rect.width / float(len(self.items))
+
+        allowed_width = int(0.9 * bin_width)
+        allowed_height = int(self.bar.rect.height * 0.9)
+
+        def resize(img):
+            if img.get_width() < allowed_width and img.get_height < allowed_height:
+                return img
+
+            aspect = img.get_width() / float(img.get_height())
+            allowed_aspect = allowed_width / float(allowed_height)
+
+            if aspect > allowed_aspect:
+                width = allowed_width
+                height = int(allowed_width / aspect)
+            else:
+                width = int(allowed_height * aspect)
+                height = allowed_height
+
+            return pygame.transform.smoothscale(img, (width, height))
+        
+        for i in xrange(len(self.items)):
+            img = resize(self.items[i].image)
+
+            bar.blit(img,
+                ((i + 0.5) * bin_width - img.get_width() / 2,
+                (bar.get_height() - img.get_height()) / 2))
+
+        self.items.bar_image = bar
+        self.bar.image = bar
 
     anim = 0
     anim_direction = LEFT
