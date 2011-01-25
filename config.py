@@ -29,6 +29,8 @@ config["item distance"] = 200
 config["drag offset"] = 50
 config["drag area"] = 520
 
+config["a lot of items"] = 30
+
 config["width"] = 800
 config["height"] = 600
 

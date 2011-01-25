@@ -49,6 +49,7 @@ class Gui:
         self.DISTANCE = config["item distance"]
         self.DRAG_OFFSET = config["drag offset"]
         self.DRAG_AREA = config["drag area"]
+        self.A_LOT_OF_ITEMS = config["a lot of items"]
 
         self.disabled_y = int(self.DISABLED_LINE * self.screen.get_height())
 
@@ -223,12 +224,12 @@ class Gui:
         
         self.screen.blit(self.background, (0, 0))
 
-        self.draw_sprite(self.bar)
-
         self.draw_bg_text()
 
         if self.hide_fg:
             return
+
+        self.draw_sprite(self.bar)
 
         self.draw_items()
 
@@ -471,16 +472,16 @@ class Gui:
         bar = pygame.Surface(self.bar.rect.size, SRCALPHA)
         bar.fill((0, 0, 0, 0))
 
+        step = 1
+        if len(self.items) > self.A_LOT_OF_ITEMS:
+            step = len(self.items) // self.A_LOT_OF_ITEMS
 
-        #if len(self.items) > 30:
-        #    self.items.bar_image = bar
-        #    self.bar.image = bar
-        #    return #TODO something should be done here
+        displayed_indices = xrange(0, len(self.items), step)
 
-        bin_width = self.bar.rect.width / float(len(self.items))
+        bin_width = self.bar.rect.width / float(len(displayed_indices))
 
         allowed_width = int(0.9 * bin_width)
-        allowed_height = int(self.bar.rect.height * 0.9)
+        allowed_height = int(self.bar.rect.height)
 
         def resize(img):
             if img.get_width() < allowed_width and img.get_height < allowed_height:
@@ -498,12 +499,15 @@ class Gui:
 
             return pygame.transform.smoothscale(img, (width, height))
         
-        for i in xrange(len(self.items)):
+        x = bin_width / 2
+        for i in displayed_indices:
             img = resize(self.items[i].image)
 
             bar.blit(img,
-                ((i + 0.5) * bin_width - img.get_width() / 2,
+                (x - img.get_width() / 2,
                 (bar.get_height() - img.get_height()) / 2))
+
+            x += bin_width
 
         self.items.bar_image = bar
         self.bar.image = bar
