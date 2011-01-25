@@ -13,9 +13,9 @@ config["power"] = "power.png"
 config["shutdown"] = "power.png"
 config["exit"] = "close.png"
 config["artists"] = "artist.png"
-config["albums"] = "circle.png"
+config["albums"] = "album.png"
 config["default artist"] = "artist.png"
-config["default album"] = "circle.png"
+config["default album"] = "album.png"
 
 config["caption"] = "TouchBMC"
 
