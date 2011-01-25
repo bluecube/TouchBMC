@@ -13,8 +13,6 @@ class Xbmc:
             print "Making directory " + self.CACHE_DIR
             os.mkdir(self.CACHE_DIR)
 
-        self.DL_URL = "http://" + config["host"] + ":" + str(config["dl port"]) + "/vfs/"
-
     def get_file(self, name):
         """
         Returns a path of a cached (local) version of the file from the xbmc store.
@@ -27,5 +25,3 @@ class Xbmc:
             urllib.urlretrieve(self.DL_URL + name, cached_name)
             
         return cached_name
-
-    

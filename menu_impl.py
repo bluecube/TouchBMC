@@ -109,11 +109,11 @@ class MenuImpl:
 
         self.root = Menu(
             MenuItem(cache.open(config["prev"]), "Previous", 0),
-            MenuItem(cache.open(config["library"]), "Library ...",
-                Menu.action_helper(self.library_menu)),
-            MenuItem(cache.open(config["play"]), "Play", 0),
             MenuItem(cache.open(config["next"]), "Next", 0),
+            MenuItem(cache.open(config["play"]), "Play", 0),
             MenuItem(cache.open(config["stop"]), "Stop", 0),
+            MenuItem(cache.open(config["artists"]), "Artists ...", artists_action),
+            MenuItem(cache.open(config["albums"]), "Albums ...", albums_action),
             MenuItem(cache.open(config["power"]), "Power ...",
                 Menu.action_helper(self.power_menu)),
             current = 2
