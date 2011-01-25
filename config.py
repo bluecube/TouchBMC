@@ -40,8 +40,11 @@ config["font color"] = (100, 100, 100)
 
 config["bg font"] = "Bitstream Vera Sans"
 config["bg font size"] = 64
-config["bg font color"] = (180, 180, 180)
+config["bg font color"] = (100, 100, 100)
 config["bg font pos"] = (10, 10)
+config["bg font alpha"] = 128
+
+config["bar alpha"] = 128
 
 config["HierarchicalMenu font"] = "Bitstream Vera Sans"
 config["HierarchicalMenu font size"] = 150

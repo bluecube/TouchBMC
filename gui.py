@@ -41,6 +41,7 @@ class Gui:
         self.bg_font = pygame.font.SysFont(config["bg font"], config["bg font size"])
         self.BG_FONT_COLOR = config["bg font color"]
         self.BG_FONT_POS = config["bg font pos"]
+        self.BG_FONT_ALPHA = config["bg font alpha"]
 
         self.ANTIALIAS = config["antialias"]
         self.FPS = config["fps"]
@@ -50,6 +51,7 @@ class Gui:
         self.DRAG_OFFSET = config["drag offset"]
         self.DRAG_AREA = config["drag area"]
         self.A_LOT_OF_ITEMS = config["a lot of items"]
+        self.BAR_ALPHA = config["bar alpha"]
 
         self.disabled_y = int(self.DISABLED_LINE * self.screen.get_height())
 
@@ -164,7 +166,7 @@ class Gui:
         else:
             self.bg_text[line_number] = ScrollingText(text, self.bg_font,
                 self.screen, x_offset, y,
-                self.ANTIALIAS, self.BG_FONT_COLOR,
+                self.ANTIALIAS, self.BG_FONT_COLOR, self.BG_FONT_ALPHA,
                 self.BG_TEXT_ANIM_SPEED)
 
     def update(self):
@@ -509,6 +511,8 @@ class Gui:
 
             x += bin_width
 
+        bar.fill((255, 255, 255, self.BAR_ALPHA), special_flags = BLEND_RGBA_MULT)
+
         self.items.bar_image = bar
         self.bar.image = bar
 
@@ -524,7 +528,7 @@ class ScrollingText():
     One line of text that is possibly scrolling.
     """
 
-    def __init__(self, text, font, screen, x_offset, y, antialias, color, anim_speed):
+    def __init__(self, text, font, screen, x_offset, y, antialias, color, alpha, anim_speed):
         """
         text: string to render
         font: font object
@@ -535,6 +539,7 @@ class ScrollingText():
         """
 
         self.rendered = font.render(text, antialias, color)
+        self.rendered.fill((255, 255, 255, alpha), special_flags = BLEND_RGBA_MULT)
         self.text = text;
 
         self.anim_speed = anim_speed
