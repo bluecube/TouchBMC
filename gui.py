@@ -9,6 +9,8 @@ from gui_animations import *
 from gui_states import *
 
 class Gui:
+    ROW_COUNT = 4
+    DIM_TIMER_TICK = 5000
     def __init__(self, config, cache):
         # only initialize what we really need from pygame
         pygame.display.init()
@@ -24,7 +26,7 @@ class Gui:
         self._add_animations(config, self._screen, cache)
 
         self.clock = pygame.time.Clock()
-        pygame.time.set_timer(USEREVENT, 5000)
+        pygame.time.set_timer(USEREVENT, Gui.DIM_TIMER_TICK)
         
         self.font = pygame.font.SysFont(config["font"], config["font size"])
         self.bg_font = pygame.font.SysFont(config["bg font"], config["bg font size"])
@@ -42,7 +44,7 @@ class Gui:
 
         bg_font = pygame.font.SysFont(config["bg font"], config["bg font size"])
         self._bg_text = []
-        for i in range(4):
+        for i in range(Gui.ROW_COUNT):
             self._bg_text.append(ScrollingText(config, screen, i, bg_font))
             self._manager.add(self._bg_text[i])
 
@@ -63,6 +65,13 @@ class Gui:
 
         self._scroller = ScrollingMenu(config, screen)
         self._foreground_manager.add(self._scroller)
+
+    def wakeup(self):
+        """
+        Wake up the gui if it is possibly sleeping in the event loop.
+        (works by posting a new event
+        """
+        pygame.event.post(pygame.event.Event(USEREVENT + 1))
 
     def set_root_menu(self, menu):
         """

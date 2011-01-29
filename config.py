@@ -22,6 +22,8 @@ config["caption"] = "TouchBMC"
 config["antialias"] = True
 
 config["fps"] = 20
+config["update fps"] = 2
+
 config["menu scroll time"] = 0.5
 config["hide fg counter top"] = 4 # in 5 sec units
 config["item distance"] = 200
@@ -42,6 +44,13 @@ config["bg font size"] = 64
 config["bg font color"] = (100, 100, 100)
 config["bg font pos"] = (10, 10)
 config["bg font alpha"] = 128
+config["bg text"] = (
+    "{title}",
+    "{artist}",
+    "{album}",
+    "{minute}:{second:02} / {minute_total}:{second_total:02}"
+)
+
 
 config["bar alpha"] = 128
 
@@ -52,5 +61,6 @@ config["HierarchicalMenu font color"] = (30, 30, 30)
 config["host"] = "10.0.0.200"
 config["port"] = 9090
 config["dl port"] = 80
+
 
 config["cache dir"] = "/tmp/cache/"

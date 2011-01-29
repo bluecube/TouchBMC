@@ -1,7 +1,9 @@
 class Animation(object):
     """
     An object that can be animated.
-    important fields: disabled, rect, anim_length, anim, repeat, running
+    important fields: disabled, rect, anim_length, anim, repeat, running, dirty
+    If the dirty flag is true, then we need update even though the animation is
+    not running
     """
 
     def __init__(self):
@@ -9,6 +11,7 @@ class Animation(object):
         self.anim = 0
         self.repeat = False
         self.running = True
+        self.dirty = False
 
     def draw(self, surface):
         """
@@ -25,8 +28,11 @@ class Animation(object):
         slef.anim, based on the other fields ... use the code, Luke.
         You must set self.anim_length before calling this method!
         """
+        dirty = self.dirty
+        self.dirty = False
+
         if not self.running:
-            return False
+            return dirty
 
         self.anim += 1
 
@@ -34,7 +40,7 @@ class Animation(object):
             self.anim = 0
             self.running = self.repeat
         
-        return self.running
+        return self.running or dirty
         
 class StillImage(Animation):
     """

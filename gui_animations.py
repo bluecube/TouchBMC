@@ -61,6 +61,8 @@ class ScrollingText(Animation):
             x = self._screen.get_width() - self.rendered.get_width() - self._x
             self.rect = Rect(x, self._y, self.rendered.get_width(), self.rendered.get_height())
 
+        self.dirty = True
+
     def draw(self, screen):
         """
         Draw the text to the given screen
@@ -134,6 +136,8 @@ class PositionBar(StillImage):
 
         self.image.fill((255, 255, 255, self._config["bar alpha"]),
             special_flags = BLEND_RGBA_MULT)
+
+        self.dirty = True
 
     def _resize(self, img, allowed_width, allowed_height):
         if img.get_width() < allowed_width and img.get_height < allowed_height:

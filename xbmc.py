@@ -25,3 +25,28 @@ class Xbmc:
             urllib.urlretrieve(self.DL_URL + name, cached_name)
             
         return cached_name
+
+    def get_status(self):
+        """
+        Returns a dictionary with information about a playing track.
+        """
+        ret = {}
+        try:
+            time = self.call.AudioPlayer.GetTime()
+        except json_rpc2_proxy.JsonRPCException as e:
+            if e.code != -32100:
+                raise
+
+            ret["playing"] = False
+            return ret
+        else:
+            ret["playing"] = True
+            ret["minute"], ret["second"] = divmod(time["time"], 60)
+            ret["minute_total"], ret["second_total"] = divmod(time["total"], 60)
+        
+        ret["title"] = ""
+        ret["artist"] = ""
+        ret["album"] = ""
+
+        return ret
+        
