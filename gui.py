@@ -54,6 +54,9 @@ class Gui:
         self._position_bar = PositionBar(config, self._screen)
         self._foreground_manager.add(self._position_bar)
 
+        self._scroller = ScrollingMenu(config, screen)
+        self._foreground_manager.add(self._scroller)
+
         self._left = Image(config["left"],  1 * x_6, 3 * y_6, cache)
         self._foreground_manager.add(self._left)
 
@@ -62,9 +65,6 @@ class Gui:
 
         self._back = Image(config["back"],  1 * x_6, 1 * y_6, cache)
         self._foreground_manager.add(self._back)
-
-        self._scroller = ScrollingMenu(config, screen)
-        self._foreground_manager.add(self._scroller)
 
     def wakeup(self):
         """
