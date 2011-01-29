@@ -1,5 +1,6 @@
 import json
 import socket
+import threading
 
 class JsonRPCException(Exception):
     def __init__(self, err):
@@ -10,7 +11,7 @@ class JsonRPCException(Exception):
         return self.message + " (code: " + repr(self.code) + ")"
 
 class JsonRPCProxy:
-    def __init__(self, conn, method = ""):
+    def __init__(self, conn, method = "", lock = None):
         """
             conn - tuple (hostname, port) or socket
         """
@@ -18,14 +19,18 @@ class JsonRPCProxy:
             self._socket = conn
         else:
             self._socket = socket.create_connection(conn)
-            # TODO: This timeout thing is not cool :-)
         
+        if lock:
+            self._lock = lock
+        else:
+            self._lock = threading.Lock()
+
         self._method = method
 
     def __getattr__(self, name):
         if self._method != "":
             name = self._method + "." + name
-        return JsonRPCProxy(self._socket, name)
+        return JsonRPCProxy(self._socket, name, self._lock)
 
     def __call__(self, *args, **kwargs):
         obj = {"jsonrpc": "2.0", "method": self._method, "id": 0}
@@ -39,16 +44,18 @@ class JsonRPCProxy:
             obj["params"] = kwargs
 
         data = json.dumps(obj)
-        self._socket.sendall(data)
 
-        try:
-            self._socket.settimeout(10)
-            data = self._socket.recv(4096)
-            self._socket.settimeout(0.1)
-            while True:
-                data += self._socket.recv(4096)
-        except socket.timeout:
-            pass
+        with self._lock:
+            self._socket.sendall(data)
+    
+            try:
+                self._socket.settimeout(10)
+                data = self._socket.recv(4096)
+                self._socket.settimeout(0.1)
+                while True:
+                    data += self._socket.recv(4096)
+            except socket.timeout:
+                pass
 
         response = json.loads(data)
 
