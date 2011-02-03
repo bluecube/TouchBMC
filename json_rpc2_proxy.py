@@ -11,30 +11,30 @@ class JsonRPCException(Exception):
         return self.message + " (code: " + repr(self.code) + ")"
 
 class JsonRPCProxy:
-    def __init__(self, conn, method = "", lock = None):
+    def __init__(self, conn = None, root = None, method = ""):
         """
-            conn - tuple (hostname, port) or socket
+        conn - tuple (hostname, port) or socket
+        The root and method parameters are only used on sub proxies.
         """
-        if isinstance(conn, socket.socket):
-            self._socket = conn
-        else:
-            self._socket = socket.create_connection(conn)
-        
-        if lock:
-            self._lock = lock
-        else:
-            self._lock = threading.Lock()
 
         self._method = method
+
+        if root is not None:
+            self._root = root
+            return
+
+        self._root = self
+        self._socket = socket.create_connection(conn)
+        self._lock = threading.Lock()
 
     def __getattr__(self, name):
         if self._method != "":
             name = self._method + "." + name
-        return JsonRPCProxy(self._socket, name, self._lock)
+        return JsonRPCProxy(method = name, root = self._root)
 
     def __call__(self, *args, **kwargs):
+        root = self._root
         obj = {"jsonrpc": "2.0", "method": self._method, "id": 0}
-
 
         if len(args) and len(kwargs):
             raise Exception("You can't have both named and positional parameters")
@@ -45,15 +45,15 @@ class JsonRPCProxy:
 
         data = json.dumps(obj)
 
-        with self._lock:
-            self._socket.sendall(data)
+        with root._lock:
+            root._socket.sendall(data)
     
             try:
-                self._socket.settimeout(10)
-                data = self._socket.recv(4096)
-                self._socket.settimeout(0.1)
+                root._socket.settimeout(10)
+                data = root._socket.recv(4096)
+                root._socket.settimeout(0.1)
                 while True:
-                    data += self._socket.recv(4096)
+                    data += root._socket.recv(4096)
             except socket.timeout:
                 pass
 
