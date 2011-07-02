@@ -14,6 +14,7 @@ class XbmcThread(threading.Thread):
         self.daemon = True
 
     def run(self):
+        return
         while True:
             self._clock.tick(self._config["update fps"])
             self._update_status()
