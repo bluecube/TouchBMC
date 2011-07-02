@@ -130,7 +130,7 @@ class Gui:
 
         item = self._scroller._items[self._scroller._current]
         if callable(item.action):
-            item.action(self)
+            item.action(item, self)
         else:
             print "Invalid action on item!"
 

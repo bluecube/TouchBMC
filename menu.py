@@ -35,7 +35,7 @@ class Menu:
 
     @staticmethod
     def action_helper(menu):
-        def action(gui):
+        def action(menuitem, gui):
             gui.set_menu(menu)
         return action
 
@@ -91,7 +91,7 @@ class HierarchicalMenu(Menu):
                 HierarchicalMenu.letters[key] = self.font.render(key, self.ANTIALIAS, self.FONT_COLOR)
 
             def helper(key):
-                def action(gui):
+                def action(menuitem, gui):
                     gui.set_menu(self._get_submenu(key))
                 return action
 

@@ -39,10 +39,10 @@ class MenuImpl:
             image = pygame.transform.smoothscale(image, (width, height))
             return image.convert_alpha()
 
-        def tracks_action(gui, album_id = None):
+        def tracks_action(menuitem, gui, album_id = None):
             pass
 
-        def albums_action(gui, artist_id = None):
+        def albums_action(menuitem, gui, artist_id = None):
             """
             Load the list of artists from the XBMC and display the menu.
             """
@@ -61,15 +61,15 @@ class MenuImpl:
                 else:
                     image = self.cache.open(self.config["default album"])
 
-                def action(gui2):
-                    tracks_action(gui2, album["albumid"])
+                def action(menuitem2, gui2):
+                    tracks_action(menuitem2, gui2, album["albumid"])
 
                 return MenuItem(image, text, action)
 
             self.albums_menu.fill(*map(convert, result["albums"]))
-            Menu.action_helper(self.albums_menu)(gui)
+            Menu.action_helper(self.albums_menu)(menuitem, gui)
 
-        def artists_action(gui):
+        def artists_action(menuitem, gui):
             """
             Load the list of artists from the XBMC and display the menu.
             """
@@ -85,21 +85,26 @@ class MenuImpl:
                 else:
                     image = self.cache.open(self.config["default artist"])
 
-                def action(gui2):
-                    albums_action(gui2, artist["artistid"])
+                def action(menuitem2, gui2):
+                    albums_action(menuitem2, gui2, artist["artistid"])
 
                 return MenuItem(image, text, action)
 
             self.artists_menu.fill(*map(convert, result["artists"]))
-            Menu.action_helper(self.artists_menu)(gui)
+            Menu.action_helper(self.artists_menu)(menuitem, gui)
         
-        def poweroff_action(gui):
+        def poweroff_action(menuitem, gui):
             gui.go_back()
             xbmc.call.System.Suspend()
 
+        def playpause_action(menuitem, gui):
+            state = xbmc.call.AudioPlayer.PlayPause()
+            print state
+                
+
         self.power_menu = Menu(
             MenuItem(cache.open(config["shutdown"]), "Power off", poweroff_action),
-            MenuItem(cache.open(config["exit"]), "Exit", lambda gui: sys.exit()),
+            MenuItem(cache.open(config["exit"]), "Exit", lambda menuitem, gui: sys.exit()),
         )
 
         self.library_menu = Menu(
@@ -110,7 +115,7 @@ class MenuImpl:
         self.root = Menu(
             MenuItem(cache.open(config["prev"]), "Previous", 0),
             MenuItem(cache.open(config["next"]), "Next", 0),
-            MenuItem(cache.open(config["play"]), "Play", 0),
+            MenuItem(cache.open(config["play"]), "Play", playpause_action),
             MenuItem(cache.open(config["stop"]), "Stop", 0),
             MenuItem(cache.open(config["artists"]), "Artists ...", artists_action),
             MenuItem(cache.open(config["albums"]), "Albums ...", albums_action),
