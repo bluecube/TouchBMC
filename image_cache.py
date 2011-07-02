@@ -15,7 +15,7 @@ class ImageCache:
             print "Making directory " + self.CACHE_DIR
             os.mkdir(self.CACHE_DIR)
 
-        self.DL_URL = "http://" + config["host"] + ":" + str(config["dl port"]) + "/vfs/"
+        self.DL_URL = config["vfs url"]
 
         self.cache = weakref.WeakValueDictionary()
 

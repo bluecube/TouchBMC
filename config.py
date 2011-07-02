@@ -58,9 +58,7 @@ config["HierarchicalMenu font"] = "Bitstream Vera Sans"
 config["HierarchicalMenu font size"] = 150
 config["HierarchicalMenu font color"] = (30, 30, 30)
 
-config["host"] = "10.0.0.200"
-config["port"] = 9090
-config["dl port"] = 80
-
+config["jsonrpc url"] = "http://localhost/jsonrpc"
+config["vfs url"] = "http://localhost/vfs/"
 
 config["cache dir"] = "/tmp/cache/"
