@@ -25,7 +25,7 @@ class Animation(object):
         Update the animation, returns True if we need more ticks,
         False if the anim is finished.
         The default animation steps through an animation couter
-        slef.anim, based on the other fields ... use the code, Luke.
+        self.anim, based on the other fields ... use the code, Luke.
         You must set self.anim_length before calling this method!
         """
         dirty = self.dirty
