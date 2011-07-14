@@ -53,10 +53,10 @@ class ScrollingText(Animation):
         self.running = (effective_width < self.rendered.get_width())
         self.anim = 0
 
-        self.anim_len = self.rendered.get_width() + self._space
+        self.anim_length = self.rendered.get_width() + self._space
 
         if self.running:
-            self.rect = Rect(0, self._y, screen.get_width(), self.rendered.get_height())
+            self.rect = Rect(0, self._y, self._screen.get_width(), self.rendered.get_height())
         else:
             x = self._screen.get_width() - self.rendered.get_width() - self._x
             self.rect = Rect(x, self._y, self.rendered.get_width(), self.rendered.get_height())
@@ -70,8 +70,8 @@ class ScrollingText(Animation):
 
         #TODO: Modify the scrolling speed
         if self.anim:
-            screen.blit(self.rendered, (-self.anim_state, self.rect.top))
-            screen.blit(self.rendered, (self.anim_len - self.anim_state, self.rect.top))
+            screen.blit(self.rendered, (-self.anim, self.rect.top))
+            screen.blit(self.rendered, (self.anim_length - self.anim, self.rect.top))
         else:
             screen.blit(self.rendered, self.rect.topleft)
 
