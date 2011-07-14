@@ -3,4 +3,5 @@ Something like YATSE, but with much less features and much bigger buttons.
 
 Currently only a sketch of the GUI is written.
 
-Depends only on pygame, but this might change.
+Depends on pygame and jsonrpc (https://github.com/NCMI/jsonrpc ; recent version),
+but this will still change.
