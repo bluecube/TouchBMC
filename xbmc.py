@@ -1,9 +1,14 @@
+from __future__ import unicode_literals
+
 import urllib
 import os
 
 import jsonrpc.proxy
 
+
 class Xbmc:
+    PLAYING, PAUSED, IDLE = range(3)
+
     def __init__(self, config):
         self.call = jsonrpc.proxy.JSONRPCProxy.from_url(config["jsonrpc url"])
 
@@ -12,6 +17,21 @@ class Xbmc:
         if not os.path.exists(self.CACHE_DIR):
             print "Making directory " + self.CACHE_DIR
             os.mkdir(self.CACHE_DIR)
+
+    @property
+    def player_status(self):
+        try:
+            result = self.call.AudioPlayer.State()
+        except jsonrpc.common.RPCError as e:
+            if e.code == -32100:
+                return self.IDLE
+            
+            raise
+
+        if result['paused']:
+            return self.PAUSED
+
+        return self.PLAYING
 
     def get_file(self, name):
         """
@@ -26,27 +46,25 @@ class Xbmc:
             
         return cached_name
 
-    def get_status(self):
+    @property
+    def labels(self):
         """
         Returns a dictionary with information about a playing track.
         """
-        ret = {}
-        try:
-            time = self.call.AudioPlayer.GetTime()
-        except json_rpc2_proxy.JsonRPCException as e:
-            if e.code != -32100:
-                raise
 
-            ret["playing"] = False
-            return ret
-        else:
-            ret["playing"] = True
-            ret["minute"], ret["second"] = divmod(time["time"], 60)
-            ret["minute_total"], ret["second_total"] = divmod(time["total"], 60)
-        
-        ret["title"] = ""
-        ret["artist"] = ""
-        ret["album"] = ""
+        labels = self.call.System.GetInfoLabels([
+            "MusicPlayer.Title",
+            "MusicPlayer.Album",
+            "MusicPlayer.Artist",
+            "Player.Time",
+            "Player.Duration"])
+
+        ret = {}
+        ret["title"] = labels["MusicPlayer.Title"]
+        ret["album"] = labels["MusicPlayer.Album"]
+        ret["artist"] = labels["MusicPlayer.Artist"]
+        ret["time"] = labels["Player.Time"]
+        ret["duration"] = labels["Player.Duration"]
 
         return ret
         

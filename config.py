@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 config = {}
 
 config["background"] = "skin/bg.png"
@@ -48,7 +50,7 @@ config["bg text"] = (
     "{title}",
     "{artist}",
     "{album}",
-    "{minute}:{second:02} / {minute_total}:{second_total:02}"
+    "{time} / {duration}"
 )
 
 
@@ -58,7 +60,7 @@ config["HierarchicalMenu font"] = "Bitstream Vera Sans"
 config["HierarchicalMenu font size"] = 150
 config["HierarchicalMenu font color"] = (30, 30, 30)
 
-config["jsonrpc url"] = "http://localhost/jsonrpc"
-config["vfs url"] = "http://localhost/vfs/"
+config["jsonrpc url"] = "http://10.0.0.200/jsonrpc"
+config["vfs url"] = "http://10.0.0.200/vfs/"
 
 config["cache dir"] = "/tmp/cache/"

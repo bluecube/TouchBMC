@@ -14,21 +14,21 @@ class XbmcThread(threading.Thread):
         self.daemon = True
 
     def run(self):
-        return
         while True:
             self._clock.tick(self._config["update fps"])
             self._update_status()
 
     def _update_status(self):
-        status = self._xbmc.get_status()
+        status = self._xbmc.player_status
 
-        if not status["playing"]:
+        if status == Xbmc.IDLE:
             for i in range(Gui.ROW_COUNT):
                 self._gui.set_bg_text(i, "")
             return
 
+        labels = self._xbmc.labels
         rows = self._config["bg text"]
         for i in range(Gui.ROW_COUNT):
-            self._gui.set_bg_text(i, rows[i].format(**status))
+            self._gui.set_bg_text(i, rows[i].format(**labels))
 
         self._gui.wakeup()
