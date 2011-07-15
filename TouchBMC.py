@@ -18,6 +18,5 @@ gui.set_root_menu(menu.get_root_menu())
 
 status_updater.start()
 
-while True:
-    gui.work();
+gui.main()
 

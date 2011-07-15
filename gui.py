@@ -177,7 +177,11 @@ class Gui:
         return (direction == self.LEFT and current >= 1) or \
             (direction == self.RIGHT and current < len(self.items) - 1)
 
-    def work(self):
+    def main(self):
+        while True:
+            self._work()
+
+    def _work(self):
         """
         Process a single frame. Note: this might block.
         """
