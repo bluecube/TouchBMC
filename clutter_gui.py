@@ -178,13 +178,6 @@ class Gui:
         menuitem = self._menu[self._current]
         menuitem.action(menuitem, self)
 
-    def _arrow_status(self):
-        """
-        Show or hide the left and right arrows.
-        """
-        self._left.disabled = not self._scroller.can_go(ScrollingMenu.LEFT)
-        self._right.disabled = not self._scroller.can_go(ScrollingMenu.RIGHT)
-
     def _hide_arrow(self, arrow):
         arrow.set_reactive(False)
         arrow.animate(clutter.EASE_OUT_CUBIC, 500, "opacity", 0)
@@ -208,15 +201,3 @@ class Gui:
         There are four lines available.
         """
         self._bg_text[line_number].set_text(text)
-
-    def can_go(self, direction):
-        """
-        Find out if the items selection can move in the given direction.
-        """
-        current = self.current
-        if self.anim:
-            current += self.anim_direction
-
-        return (direction == self.LEFT and current >= 1) or \
-            (direction == self.RIGHT and current < len(self.items) - 1)
-
