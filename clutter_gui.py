@@ -101,7 +101,7 @@ class Gui:
         This is a simplified version of set_menu.
         """
         self._set_menu(menu)
-        self._back.disabled = True
+        self._hide_arrow(self._back)
 
     def set_menu(self, menu, is_forward = True):
         """
@@ -115,9 +115,11 @@ class Gui:
             menu.parent = self._menu
 
         self._set_menu(menu)
-        self._back_disabled = not bool(menu.parent)
 
-        #self._arrow_status()
+        if bool(menu.parent):
+            self._show_arrow(self._back)
+        else:
+            self._hide_arrow(self._back)
 
     def _set_menu(self, menu):
         self._menu = menu
@@ -167,6 +169,7 @@ class Gui:
 
     def _back_clicked(self, arrow, ev):
         self._blink_button(arrow)
+        self.go_back()
 
     def _menu_clicked(self, item, ev):
         self._blink_button(item)
