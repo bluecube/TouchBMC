@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 config = {}
 
-config["background"] = "skin/bg.jpg"
 config["left"] = "skin/left.png"
 config["right"] = "skin/right.png"
 config["back"] = "skin/left.png"
