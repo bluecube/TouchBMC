@@ -139,13 +139,20 @@ class Gui:
 
         self._current = following
 
-        self._menu[current].texture.animate(clutter.EASE_IN_CUBIC, 200, "depth", self.MENU_INACTIVE_DEPTH)
-        self._menu[following].texture.animate(clutter.EASE_OUT_CUBIC, 200, "depth", self.MENU_ACTIVE_DEPTH)
-
-        self._row.animate(clutter.EASE_IN_OUT_CUBIC, 1000, "x", self._row_x_coord())
-
         self._menu[current].texture.set_reactive(False)
-        self._menu[following].texture.set_reactive(True)
+
+        def after_animation(anim):
+            self._menu[following].texture.set_reactive(True)
+
+        self._menu[current].texture.animate(clutter.EASE_IN_CUBIC, 200,
+            "depth", self.MENU_INACTIVE_DEPTH)
+        self._menu[following].texture.animate(clutter.EASE_OUT_CUBIC, 200,
+            "depth", self.MENU_ACTIVE_DEPTH)
+
+        self._row.detach_animation()
+        self._row.animate(clutter.EASE_IN_OUT_CUBIC, 1000,
+            "x", self._row_x_coord()).connect_after("completed", after_animation)
+
 
         self._arrow_visibility()
 
