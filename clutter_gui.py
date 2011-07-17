@@ -39,7 +39,7 @@ class Gui:
         self._right = self._add_arrow("right", 5 * x_6, 3 * y_6, self._right_clicked)
         self._back = self._add_arrow("back", x_6, y_6, self._back_clicked)
 
-        self._menu_row = None
+        self._row = self._create_menu_row()
 
         self._stage.show()
 
@@ -58,36 +58,9 @@ class Gui:
 
         return arrow
 
-    def _create_menu_row(self, menu):
-        if self._menu_row:
-            self._stage.remote(self._menu_row)
-            self._menu_row.destroy()
-
+    def _create_menu_row(self):
         row = clutter.Group()
         self._stage.add(row)
-
-        for i in range(len(menu)):
-            texture = clutter.Texture(menu[i].image)
-            row.add(texture)
-
-            texture.set_depth(self.MENU_INACTIVE_DEPTH)
-
-            texture.connect('button-press-event', self._menu_clicked)
-            texture.set_position(i * self.MENU_STEP, 0)
-
-            texture.show()
-    
-            if i == self._current:
-                texture.set_reactive(True);
-                texture.set_depth(self.TOP_LAYER_DEPTH)
-
-            menu[i].texture = texture
-
-        row.set_y((self._stage.get_height() - row.get_height()) / 2)
-
-        self._row = row
-
-        self._scroll(0)
 
         row.show()
 
@@ -125,7 +98,30 @@ class Gui:
         self._menu = menu
         self._current = menu.last_index
 
-        self._create_menu_row(menu)
+        self._row.remove_all()
+
+        for i in range(len(menu)):
+            texture = clutter.Texture(menu[i].image)
+            self._row.add(texture)
+
+            texture.set_depth(self.MENU_INACTIVE_DEPTH)
+
+            texture.connect('button-press-event', self._menu_clicked)
+            texture.set_position(i * self.MENU_STEP, 0)
+
+            texture.show()
+    
+            if i == self._current:
+                texture.set_reactive(True);
+                texture.set_depth(self.TOP_LAYER_DEPTH)
+
+            menu[i].texture = texture
+
+        self._row.set_position(
+            self._row_x_coord(),
+            (self._stage.get_height() - self._row.get_height()) / 2)
+
+        self._arrow_visibility()
 
     def go_back(self):
         """
@@ -134,27 +130,32 @@ class Gui:
         if self._menu.parent:
             self.set_menu(self._menu.parent, is_forward = False)
 
+    def _row_x_coord(self ):
+        return (self._stage.get_width() / 2 - self._menu[0].texture.get_width() / 2) - self.MENU_STEP * self._current
+
     def _scroll(self, direction):
         current = self._current
         following = self._current + direction
 
+        self._current = following
+
         self._menu[current].texture.animate(clutter.EASE_IN_CUBIC, 200, "depth", self.MENU_INACTIVE_DEPTH)
         self._menu[following].texture.animate(clutter.EASE_OUT_CUBIC, 200, "depth", self.MENU_ACTIVE_DEPTH)
 
-        new_x = (self._stage.get_width() / 2 - self._menu[0].texture.get_width() / 2) - self.MENU_STEP * following
-        self._row.animate(clutter.EASE_IN_OUT_CUBIC, 1000, "x", new_x)
+        self._row.animate(clutter.EASE_IN_OUT_CUBIC, 1000, "x", self._row_x_coord())
 
         self._menu[current].texture.set_reactive(False)
         self._menu[following].texture.set_reactive(True)
 
-        self._current = following
+        self._arrow_visibility()
 
-        if following == 0:
+    def _arrow_visibility(self):
+        if self._current == 0:
             self._hide_arrow(self._left)
         elif not self._left.get_reactive():
             self._show_arrow(self._left)
         
-        if following == len(self._menu) - 1:
+        if self._current == len(self._menu) - 1:
             self._hide_arrow(self._right)
         elif not self._right.get_reactive():
             self._show_arrow(self._right)
