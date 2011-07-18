@@ -25,13 +25,6 @@ class Gui:
         self._stage.connect("destroy", clutter.main_quit)
         self._stage.set_color(clutter.Color(0, 0, 0, 255))
 
-        # background texture
-        #self._bg = clutter.Texture(config["background"])
-        #self._stage.add(self._bg)
-        #self._bg.set_position(0, 0)
-        #self._bg.set_size(self._stage.get_width(), self._stage.get_height())
-        #self._bg.show()
-
         x_6 = self._stage.get_width() // 6
         y_6 = self._stage.get_height() // 6
 
@@ -74,7 +67,7 @@ class Gui:
         This is a simplified version of set_menu.
         """
         self._set_menu(menu)
-        self._hide_arrow(self._back)
+        self._hide_button(self._back)
 
     def set_menu(self, menu, is_forward = True):
         """
@@ -90,9 +83,9 @@ class Gui:
         self._set_menu(menu)
 
         if bool(menu.parent):
-            self._show_arrow(self._back)
+            self._show_button(self._back)
         else:
-            self._hide_arrow(self._back)
+            self._hide_button(self._back)
 
     def _set_menu(self, menu):
         self._menu = menu
@@ -158,14 +151,14 @@ class Gui:
 
     def _arrow_visibility(self):
         if self._current == 0:
-            self._hide_arrow(self._left)
+            self._hide_button(self._left)
         elif not self._left.get_reactive():
-            self._show_arrow(self._left)
+            self._show_button(self._left)
         
         if self._current == len(self._menu) - 1:
-            self._hide_arrow(self._right)
+            self._hide_button(self._right)
         elif not self._right.get_reactive():
-            self._show_arrow(self._right)
+            self._show_button(self._right)
 
     def _left_clicked(self, arrow, ev):
         self._blink_button(arrow)
@@ -185,11 +178,11 @@ class Gui:
         menuitem = self._menu[self._current]
         menuitem.action(menuitem, self)
 
-    def _hide_arrow(self, arrow):
+    def _hide_button(self, arrow):
         arrow.set_reactive(False)
-        arrow.animate(clutter.EASE_OUT_CUBIC, 500, "opacity", 0)
+        arrow.animate(clutter.EASE_IN_OUT_CUBIC, 500, "opacity", 0)
 
-    def _show_arrow(self, arrow):
+    def _show_button(self, arrow):
         arrow.animate(clutter.EASE_IN_OUT_CUBIC, 500, "opacity", 255)
         arrow.set_reactive(True)
 
@@ -207,4 +200,4 @@ class Gui:
         Set the text to be displayed on the background.
         There are four lines available.
         """
-        self._bg_text[line_number].set_text(text)
+        pass
